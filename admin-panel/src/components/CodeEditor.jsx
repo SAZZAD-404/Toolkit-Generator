@@ -99,10 +99,14 @@ export default function CodeEditor() {
   };
 
   const pushToGitHubDirect = async (filePath, content, fileName) => {
-    const GITHUB_TOKEN = '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';
+    const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
     const GITHUB_USERNAME = 'SAZZAD-404';
     const GITHUB_REPO = 'Toolkit-Generator';
     const branch = 'main';
+
+    if (!GITHUB_TOKEN) {
+      throw new Error('GitHub token not configured. Add VITE_GITHUB_TOKEN to .env file');
+    }
 
     const getFileUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${filePath}`;
     
