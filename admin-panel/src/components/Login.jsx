@@ -34,7 +34,7 @@ export default function Login() {
         <div className="hidden md:block space-y-8">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-indigo-100 rounded-full">
-              <Code2 className="w-5 h-5 text-indigo-600" />
+              <img src="/icon-192.svg" alt="Logo" className="w-5 h-5" />
               <span className="text-sm font-semibold text-indigo-900">Admin Portal</span>
             </div>
             
@@ -87,7 +87,7 @@ export default function Login() {
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 md:p-10">
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-2xl mb-4">
-                <Lock className="w-8 h-8 text-indigo-600" />
+                <img src="/icon-192.svg" alt="Logo" className="w-10 h-10" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
               <p className="text-gray-600 mt-2">Sign in to access the admin panel</p>
