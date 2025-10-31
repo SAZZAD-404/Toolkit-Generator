@@ -1,7 +1,7 @@
 @echo off
 echo ========================================
 echo   Fix and Push to GitHub
-echo   Repository: Toolkit-Generators
+echo   Repository: Toolkit-Generator
 echo ========================================
 echo.
 
@@ -26,7 +26,7 @@ echo   SUCCESS!
 echo ========================================
 echo.
 echo Your code has been pushed to:
-echo https://github.com/SAZZAD-404/Toolkit-Generators
+echo https://github.com/SAZZAD-404/Toolkit-Generator
 echo.
 echo Visit the URL to see your repository!
 echo.

@@ -970,54 +970,54 @@ const countryData = {
 };
 
 const formatNumber = (countryCode, areaCode, number, format, country) => {
-  const fullNumber = `${countryCode}${areaCode}${number}`;
+  const fullNumber = `${areaCode}${number}`;
 
   switch (format) {
     case 'formatted':
       if (countryCode === '1') {
-        // USA/Canada: +1 (XXX) XXX-XXXX
-        return `${countryCode} (${areaCode}) ${number.substring(0, 3)}-${number.substring(3)}`;
+        // USA/Canada: (XXX) XXX-XXXX
+        return `(${areaCode}) ${number.substring(0, 3)}-${number.substring(3)}`;
       } else if (countryCode === '44') {
-        // UK: +44 XXXX XXXX XXXX
-        return `${countryCode} ${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
+        // UK: XXXX XXXX XXXX
+        return `${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
       } else if (countryCode === '61') {
-        // Australia: +61 XXX XXX XXX
-        return `${countryCode} ${areaCode} ${number.substring(0, 3)} ${number.substring(3, 6)} ${number.substring(6)}`;
+        // Australia: XXX XXX XXX
+        return `${areaCode} ${number.substring(0, 3)} ${number.substring(3, 6)} ${number.substring(6)}`;
       } else if (countryCode === '49') {
-        // Germany: +49 XXX XXXXXXX
-        return `${countryCode} ${areaCode} ${number}`;
+        // Germany: XXX XXXXXXX
+        return `${areaCode} ${number}`;
       } else if (countryCode === '33') {
-        // France: +33 X XX XX XX XX
-        return `${countryCode} ${areaCode} ${number.substring(0, 2)} ${number.substring(2, 4)} ${number.substring(4, 6)} ${number.substring(6)}`;
+        // France: X XX XX XX XX
+        return `${areaCode} ${number.substring(0, 2)} ${number.substring(2, 4)} ${number.substring(4, 6)} ${number.substring(6)}`;
       } else if (countryCode === '39') {
-        // Italy: +39 XXX XXXXXXX
-        return `${countryCode} ${areaCode} ${number}`;
+        // Italy: XXX XXXXXXX
+        return `${areaCode} ${number}`;
       } else if (countryCode === '34') {
-        // Spain: +34 XXX XXX XXX
-        return `${countryCode} ${areaCode} ${number.substring(0, 3)} ${number.substring(3, 6)} ${number.substring(6)}`;
+        // Spain: XXX XXX XXX
+        return `${areaCode} ${number.substring(0, 3)} ${number.substring(3, 6)} ${number.substring(6)}`;
       } else if (countryCode === '31') {
-        // Netherlands: +31 XX XXXXXXXX
-        return `${countryCode} ${areaCode} ${number}`;
+        // Netherlands: XX XXXXXXXX
+        return `${areaCode} ${number}`;
       } else if (countryCode === '46') {
-        // Sweden: +46 XX XXX XXXX
-        return `${countryCode} ${areaCode} ${number.substring(0, 3)} ${number.substring(3)}`;
+        // Sweden: XX XXX XXXX
+        return `${areaCode} ${number.substring(0, 3)} ${number.substring(3)}`;
       } else if (countryCode === '47') {
-        // Norway: +47 XXX XX XXX
-        return `${countryCode} ${areaCode} ${number.substring(0, 2)} ${number.substring(2)}`;
+        // Norway: XXX XX XXX
+        return `${areaCode} ${number.substring(0, 2)} ${number.substring(2)}`;
       } else if (countryCode === '45') {
-        // Denmark: +45 XX XX XX XX
-        return `${countryCode} ${areaCode} ${number.substring(0, 2)} ${number.substring(2, 4)} ${number.substring(4)}`;
+        // Denmark: XX XX XX XX
+        return `${areaCode} ${number.substring(0, 2)} ${number.substring(2, 4)} ${number.substring(4)}`;
       } else if (countryCode === '91') {
-        // India: +91 XXXXX XXXXX
-        return `${countryCode} ${areaCode} ${number.substring(0, 5)} ${number.substring(5)}`;
+        // India: XXXXX XXXXX
+        return `${areaCode} ${number.substring(0, 5)} ${number.substring(5)}`;
       } else if (countryCode === '81') {
-        // Japan: +81 XX XXXX XXXX
-        return `${countryCode} ${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
+        // Japan: XX XXXX XXXX
+        return `${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
       } else if (countryCode === '86') {
-        // China: +86 XXX XXXX XXXX
-        return `${countryCode} ${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
+        // China: XXX XXXX XXXX
+        return `${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
       } else {
-        return `${countryCode} ${areaCode} ${number}`;
+        return `${areaCode} ${number}`;
       }
     case 'national':
       if (countryCode === '1') {
@@ -1035,27 +1035,27 @@ const formatNumber = (countryCode, areaCode, number, format, country) => {
   }
 };
 
-const getNumberLength = (country, numberType) => {
-  // Returns [min, max] for random number generation
+const getTotalNumberLength = (country, numberType) => {
+  // Returns total digits (area code + number) for each country
   const lengths = {
-    usa: { mobile: [7, 7], landline: [7, 7], tollfree: [7, 7] },
-    uk: { mobile: [7, 7], landline: [7, 7], tollfree: [7, 7] },
-    canada: { mobile: [7, 7], landline: [7, 7], tollfree: [7, 7] },
-    australia: { mobile: [6, 6], landline: [8, 8], tollfree: [6, 6] },
-    germany: { mobile: [7, 9], landline: [6, 8], tollfree: [7, 7] },
-    france: { mobile: [8, 8], landline: [8, 8], tollfree: [8, 8] },
-    italy: { mobile: [7, 7], landline: [6, 7], tollfree: [7, 7] },
-    spain: { mobile: [8, 8], landline: [7, 7], tollfree: [7, 7] },
-    netherlands: { mobile: [8, 8], landline: [7, 7], tollfree: [7, 7] },
-    sweden: { mobile: [7, 7], landline: [6, 7], tollfree: [7, 7] },
-    norway: { mobile: [6, 6], landline: [6, 6], tollfree: [6, 6] },
-    denmark: { mobile: [6, 6], landline: [6, 6], tollfree: [6, 6] },
-    india: { mobile: [10, 10], landline: [7, 8], tollfree: [7, 7] },
-    japan: { mobile: [8, 8], landline: [7, 8], tollfree: [8, 8] },
-    china: { mobile: [8, 8], landline: [7, 8], tollfree: [8, 8] },
+    usa: { mobile: 10, landline: 10, tollfree: 10 },
+    uk: { mobile: 11, landline: 11, tollfree: 11 },
+    canada: { mobile: 10, landline: 10, tollfree: 10 },
+    australia: { mobile: 9, landline: 10, tollfree: 10 },
+    germany: { mobile: 11, landline: 11, tollfree: 11 },
+    france: { mobile: 9, landline: 9, tollfree: 9 },
+    italy: { mobile: 10, landline: 10, tollfree: 10 },
+    spain: { mobile: 9, landline: 9, tollfree: 9 },
+    netherlands: { mobile: 9, landline: 9, tollfree: 9 },
+    sweden: { mobile: 9, landline: 9, tollfree: 9 },
+    norway: { mobile: 8, landline: 8, tollfree: 8 },
+    denmark: { mobile: 8, landline: 8, tollfree: 8 },
+    india: { mobile: 10, landline: 10, tollfree: 11 },
+    japan: { mobile: 11, landline: 10, tollfree: 10 },
+    china: { mobile: 11, landline: 11, tollfree: 11 },
   };
 
-  const countryLengths = lengths[country] || { mobile: [7, 7], landline: [7, 7], tollfree: [7, 7] };
+  const countryLengths = lengths[country] || { mobile: 10, landline: 10, tollfree: 10 };
   const type = numberType === 'tollfree' ? 'tollfree' : numberType === 'mobile' ? 'mobile' : 'landline';
   return countryLengths[type];
 };
@@ -1069,8 +1069,7 @@ const generateRandomNumber = (length) => {
 const generateNumber = (country, numberType, format, specificAreaCode = 'random') => {
   const data = countryData[country];
   let areaCode, number, type;
-  const [minLen, maxLen] = getNumberLength(country, numberType);
-  const numLength = minLen === maxLen ? minLen : randomInt(minLen, maxLen);
+  const totalLength = getTotalNumberLength(country, numberType);
 
   if (numberType === 'tollfree' && data.tollFree) {
     if (specificAreaCode !== 'random') {
@@ -1079,6 +1078,7 @@ const generateNumber = (country, numberType, format, specificAreaCode = 'random'
     } else {
       areaCode = data.tollFree[randomInt(0, data.tollFree.length - 1)].code;
     }
+    const numLength = totalLength - areaCode.length;
     number = generateRandomNumber(numLength);
     type = 'tollfree';
   } else if (numberType === 'mobile' && data.mobile) {
@@ -1090,6 +1090,7 @@ const generateNumber = (country, numberType, format, specificAreaCode = 'random'
     } else {
       areaCode = data.mobile[randomInt(0, data.mobile.length - 1)];
     }
+    const numLength = totalLength - areaCode.length;
     number = generateRandomNumber(numLength);
     type = 'mobile';
   } else if (data.areaCodes) {
@@ -1099,12 +1100,13 @@ const generateNumber = (country, numberType, format, specificAreaCode = 'random'
     } else {
       areaCode = data.areaCodes[randomInt(0, data.areaCodes.length - 1)].code;
     }
+    const numLength = totalLength - areaCode.length;
     number = generateRandomNumber(numLength);
     type = numberType === 'mobile' ? 'mobile' : 'landline';
   } else {
     // For countries without specific area codes
     areaCode = '';
-    number = generateRandomNumber(numLength);
+    number = generateRandomNumber(totalLength);
     type = numberType;
   }
 
