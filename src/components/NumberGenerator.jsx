@@ -234,7 +234,7 @@ export default function NumberGenerator() {
               onChange={(e) => setFormat(e.target.value)}
               options={[
                 { value: 'formatted', label: '📋 Formatted (e.g., +1 (555) 123-4567)' },
-                { value: 'plain', label: '📝 Plain (e.g., +15551234567)' },
+                { value: 'plain', label: '📝 Plain (e.g., 15551234567)' },
                 { value: 'national', label: '🏠 National (e.g., (555) 123-4567)' },
               ]}
               className="w-full"
@@ -320,10 +320,10 @@ export default function NumberGenerator() {
                             <td className="py-3 px-4">
                               <span
                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${result.type === 'mobile'
-                                    ? 'bg-blue-900/50 text-blue-300 border border-blue-700'
-                                    : result.type === 'landline'
-                                      ? 'bg-green-900/50 text-green-300 border border-green-700'
-                                      : 'bg-purple-900/50 text-purple-300 border border-purple-700'
+                                  ? 'bg-blue-900/50 text-blue-300 border border-blue-700'
+                                  : result.type === 'landline'
+                                    ? 'bg-green-900/50 text-green-300 border border-green-700'
+                                    : 'bg-purple-900/50 text-purple-300 border border-purple-700'
                                   }`}
                               >
                                 {result.type === 'mobile' ? '📱' : result.type === 'landline' ? '☎️' : '📞'}{' '}

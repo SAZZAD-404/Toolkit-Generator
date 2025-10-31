@@ -2,7 +2,7 @@ const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + mi
 
 const countryData = {
   usa: {
-    code: '+1',
+    code: '1',
     areaCodes: [
       { code: '201', location: 'Jersey City, NJ' },
       { code: '202', location: 'Washington, DC' },
@@ -302,7 +302,7 @@ const countryData = {
     ],
   },
   uk: {
-    code: '+44',
+    code: '44',
     areaCodes: [
       { code: '20', location: 'London' },
       { code: '121', location: 'Birmingham' },
@@ -378,7 +378,7 @@ const countryData = {
     ],
   },
   canada: {
-    code: '+1',
+    code: '1',
     areaCodes: [
       { code: '204', location: 'Winnipeg, MB' },
       { code: '226', location: 'London, ON' },
@@ -432,7 +432,7 @@ const countryData = {
     ],
   },
   australia: {
-    code: '+61',
+    code: '61',
     areaCodes: [
       { code: '2', location: 'Sydney, NSW' },
       { code: '3', location: 'Melbourne, VIC' },
@@ -495,7 +495,7 @@ const countryData = {
     ],
   },
   germany: {
-    code: '+49',
+    code: '49',
     areaCodes: [
       { code: '30', location: 'Berlin' },
       { code: '40', location: 'Hamburg' },
@@ -560,7 +560,7 @@ const countryData = {
     ],
   },
   france: {
-    code: '+33',
+    code: '33',
     areaCodes: [
       { code: '1', location: 'Paris & Île-de-France' },
       { code: '2', location: 'Northwest France' },
@@ -577,7 +577,7 @@ const countryData = {
     ],
   },
   italy: {
-    code: '+39',
+    code: '39',
     areaCodes: [
       { code: '02', location: 'Milan' },
       { code: '06', location: 'Rome' },
@@ -633,7 +633,7 @@ const countryData = {
     ],
   },
   spain: {
-    code: '+34',
+    code: '34',
     areaCodes: [
       { code: '91', location: 'Madrid' },
       { code: '93', location: 'Barcelona' },
@@ -650,7 +650,7 @@ const countryData = {
     ],
   },
   netherlands: {
-    code: '+31',
+    code: '31',
     areaCodes: [
       { code: '10', location: 'Rotterdam' },
       { code: '13', location: 'Tilburg' },
@@ -691,7 +691,7 @@ const countryData = {
     ],
   },
   sweden: {
-    code: '+46',
+    code: '46',
     areaCodes: [
       { code: '8', location: 'Stockholm' },
       { code: '11', location: 'Norrköping' },
@@ -727,7 +727,28 @@ const countryData = {
     ],
   },
   norway: {
-    code: '+47',
+    code: '47',
+    areaCodes: [
+      { code: '21', location: 'Oslo' },
+      { code: '22', location: 'Oslo' },
+      { code: '23', location: 'Oslo' },
+      { code: '51', location: 'Stavanger' },
+      { code: '52', location: 'Haugesund' },
+      { code: '53', location: 'Bergen' },
+      { code: '55', location: 'Bergen' },
+      { code: '61', location: 'Ålesund' },
+      { code: '62', location: 'Molde' },
+      { code: '63', location: 'Trondheim' },
+      { code: '67', location: 'Lillehammer' },
+      { code: '69', location: 'Hamar' },
+      { code: '71', location: 'Kristiansund' },
+      { code: '72', location: 'Trondheim' },
+      { code: '73', location: 'Trondheim' },
+      { code: '75', location: 'Bodø' },
+      { code: '76', location: 'Narvik' },
+      { code: '77', location: 'Tromsø' },
+      { code: '78', location: 'Hammerfest' },
+    ],
     mobile: [
       { code: '4', location: 'Mobile' },
       { code: '9', location: 'Mobile' },
@@ -737,23 +758,72 @@ const countryData = {
     ],
   },
   denmark: {
-    code: '+45',
+    code: '45',
+    areaCodes: [
+      { code: '32', location: 'Copenhagen' },
+      { code: '33', location: 'Copenhagen' },
+      { code: '35', location: 'Copenhagen' },
+      { code: '36', location: 'Frederiksberg' },
+      { code: '38', location: 'Copenhagen' },
+      { code: '39', location: 'Copenhagen' },
+      { code: '43', location: 'Lyngby' },
+      { code: '44', location: 'Glostrup' },
+      { code: '45', location: 'Roskilde' },
+      { code: '46', location: 'Helsingør' },
+      { code: '47', location: 'Hillerød' },
+      { code: '48', location: 'Næstved' },
+      { code: '49', location: 'Nykøbing F' },
+      { code: '53', location: 'Nykøbing F' },
+      { code: '54', location: 'Nakskov' },
+      { code: '55', location: 'Slagelse' },
+      { code: '56', location: 'Holbæk' },
+      { code: '57', location: 'Kalundborg' },
+      { code: '58', location: 'Nykøbing Sj' },
+      { code: '59', location: 'Svendborg' },
+      { code: '62', location: 'Odense' },
+      { code: '63', location: 'Middelfart' },
+      { code: '64', location: 'Assens' },
+      { code: '65', location: 'Odense' },
+      { code: '66', location: 'Odense' },
+      { code: '70', location: 'Fredericia' },
+      { code: '72', location: 'Esbjerg' },
+      { code: '73', location: 'Vejle' },
+      { code: '74', location: 'Kolding' },
+      { code: '75', location: 'Esbjerg' },
+      { code: '76', location: 'Herning' },
+      { code: '79', location: 'Skive' },
+      { code: '86', location: 'Aarhus' },
+      { code: '87', location: 'Aarhus' },
+      { code: '89', location: 'Aarhus' },
+      { code: '96', location: 'Aalborg' },
+      { code: '97', location: 'Thisted' },
+      { code: '98', location: 'Aalborg' },
+      { code: '99', location: 'Hjørring' },
+    ],
     mobile: [
       { code: '2', location: 'Mobile' },
-      { code: '3', location: 'Mobile' },
-      { code: '4', location: 'Mobile' },
-      { code: '5', location: 'Mobile' },
-      { code: '6', location: 'Mobile' },
-      { code: '7', location: 'Mobile' },
-      { code: '8', location: 'Mobile' },
-      { code: '9', location: 'Mobile' },
+      { code: '30', location: 'Mobile' },
+      { code: '31', location: 'Mobile' },
+      { code: '40', location: 'Mobile' },
+      { code: '41', location: 'Mobile' },
+      { code: '42', location: 'Mobile' },
+      { code: '50', location: 'Mobile' },
+      { code: '51', location: 'Mobile' },
+      { code: '52', location: 'Mobile' },
+      { code: '53', location: 'Mobile' },
+      { code: '60', location: 'Mobile' },
+      { code: '71', location: 'Mobile' },
+      { code: '81', location: 'Mobile' },
+      { code: '91', location: 'Mobile' },
+      { code: '92', location: 'Mobile' },
+      { code: '93', location: 'Mobile' },
     ],
     tollFree: [
       { code: '80', location: 'Toll-Free' },
     ],
   },
   india: {
-    code: '+91',
+    code: '91',
     areaCodes: [
       { code: '11', location: 'New Delhi' },
       { code: '22', location: 'Mumbai' },
@@ -805,7 +875,7 @@ const countryData = {
     ],
   },
   japan: {
-    code: '+81',
+    code: '81',
     areaCodes: [
       { code: '3', location: 'Tokyo' },
       { code: '6', location: 'Osaka' },
@@ -832,7 +902,7 @@ const countryData = {
     ],
   },
   china: {
-    code: '+86',
+    code: '86',
     areaCodes: [
       { code: '10', location: 'Beijing' },
       { code: '20', location: 'Guangzhou' },
@@ -899,21 +969,63 @@ const countryData = {
   },
 };
 
-const formatNumber = (countryCode, areaCode, number, format) => {
+const formatNumber = (countryCode, areaCode, number, format, country) => {
   const fullNumber = `${countryCode}${areaCode}${number}`;
 
   switch (format) {
     case 'formatted':
-      if (countryCode === '+1') {
+      if (countryCode === '1') {
+        // USA/Canada: +1 (XXX) XXX-XXXX
         return `${countryCode} (${areaCode}) ${number.substring(0, 3)}-${number.substring(3)}`;
-      } else if (countryCode === '+44') {
+      } else if (countryCode === '44') {
+        // UK: +44 XXXX XXXX XXXX
+        return `${countryCode} ${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
+      } else if (countryCode === '61') {
+        // Australia: +61 XXX XXX XXX
+        return `${countryCode} ${areaCode} ${number.substring(0, 3)} ${number.substring(3, 6)} ${number.substring(6)}`;
+      } else if (countryCode === '49') {
+        // Germany: +49 XXX XXXXXXX
+        return `${countryCode} ${areaCode} ${number}`;
+      } else if (countryCode === '33') {
+        // France: +33 X XX XX XX XX
+        return `${countryCode} ${areaCode} ${number.substring(0, 2)} ${number.substring(2, 4)} ${number.substring(4, 6)} ${number.substring(6)}`;
+      } else if (countryCode === '39') {
+        // Italy: +39 XXX XXXXXXX
+        return `${countryCode} ${areaCode} ${number}`;
+      } else if (countryCode === '34') {
+        // Spain: +34 XXX XXX XXX
+        return `${countryCode} ${areaCode} ${number.substring(0, 3)} ${number.substring(3, 6)} ${number.substring(6)}`;
+      } else if (countryCode === '31') {
+        // Netherlands: +31 XX XXXXXXXX
+        return `${countryCode} ${areaCode} ${number}`;
+      } else if (countryCode === '46') {
+        // Sweden: +46 XX XXX XXXX
+        return `${countryCode} ${areaCode} ${number.substring(0, 3)} ${number.substring(3)}`;
+      } else if (countryCode === '47') {
+        // Norway: +47 XXX XX XXX
+        return `${countryCode} ${areaCode} ${number.substring(0, 2)} ${number.substring(2)}`;
+      } else if (countryCode === '45') {
+        // Denmark: +45 XX XX XX XX
+        return `${countryCode} ${areaCode} ${number.substring(0, 2)} ${number.substring(2, 4)} ${number.substring(4)}`;
+      } else if (countryCode === '91') {
+        // India: +91 XXXXX XXXXX
+        return `${countryCode} ${areaCode} ${number.substring(0, 5)} ${number.substring(5)}`;
+      } else if (countryCode === '81') {
+        // Japan: +81 XX XXXX XXXX
+        return `${countryCode} ${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
+      } else if (countryCode === '86') {
+        // China: +86 XXX XXXX XXXX
         return `${countryCode} ${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
       } else {
         return `${countryCode} ${areaCode} ${number}`;
       }
     case 'national':
-      if (countryCode === '+1') {
+      if (countryCode === '1') {
         return `(${areaCode}) ${number.substring(0, 3)}-${number.substring(3)}`;
+      } else if (countryCode === '44') {
+        return `${areaCode} ${number.substring(0, 4)} ${number.substring(4)}`;
+      } else if (countryCode === '61') {
+        return `${areaCode} ${number.substring(0, 3)} ${number.substring(3, 6)} ${number.substring(6)}`;
       } else {
         return `${areaCode} ${number}`;
       }
@@ -923,9 +1035,42 @@ const formatNumber = (countryCode, areaCode, number, format) => {
   }
 };
 
+const getNumberLength = (country, numberType) => {
+  // Returns [min, max] for random number generation
+  const lengths = {
+    usa: { mobile: [7, 7], landline: [7, 7], tollfree: [7, 7] },
+    uk: { mobile: [7, 7], landline: [7, 7], tollfree: [7, 7] },
+    canada: { mobile: [7, 7], landline: [7, 7], tollfree: [7, 7] },
+    australia: { mobile: [6, 6], landline: [8, 8], tollfree: [6, 6] },
+    germany: { mobile: [7, 9], landline: [6, 8], tollfree: [7, 7] },
+    france: { mobile: [8, 8], landline: [8, 8], tollfree: [8, 8] },
+    italy: { mobile: [7, 7], landline: [6, 7], tollfree: [7, 7] },
+    spain: { mobile: [8, 8], landline: [7, 7], tollfree: [7, 7] },
+    netherlands: { mobile: [8, 8], landline: [7, 7], tollfree: [7, 7] },
+    sweden: { mobile: [7, 7], landline: [6, 7], tollfree: [7, 7] },
+    norway: { mobile: [6, 6], landline: [6, 6], tollfree: [6, 6] },
+    denmark: { mobile: [6, 6], landline: [6, 6], tollfree: [6, 6] },
+    india: { mobile: [10, 10], landline: [7, 8], tollfree: [7, 7] },
+    japan: { mobile: [8, 8], landline: [7, 8], tollfree: [8, 8] },
+    china: { mobile: [8, 8], landline: [7, 8], tollfree: [8, 8] },
+  };
+
+  const countryLengths = lengths[country] || { mobile: [7, 7], landline: [7, 7], tollfree: [7, 7] };
+  const type = numberType === 'tollfree' ? 'tollfree' : numberType === 'mobile' ? 'mobile' : 'landline';
+  return countryLengths[type];
+};
+
+const generateRandomNumber = (length) => {
+  const min = Math.pow(10, length - 1);
+  const max = Math.pow(10, length) - 1;
+  return String(randomInt(min, max));
+};
+
 const generateNumber = (country, numberType, format, specificAreaCode = 'random') => {
   const data = countryData[country];
   let areaCode, number, type;
+  const [minLen, maxLen] = getNumberLength(country, numberType);
+  const numLength = minLen === maxLen ? minLen : randomInt(minLen, maxLen);
 
   if (numberType === 'tollfree' && data.tollFree) {
     if (specificAreaCode !== 'random') {
@@ -934,7 +1079,7 @@ const generateNumber = (country, numberType, format, specificAreaCode = 'random'
     } else {
       areaCode = data.tollFree[randomInt(0, data.tollFree.length - 1)].code;
     }
-    number = String(randomInt(1000000, 9999999));
+    number = generateRandomNumber(numLength);
     type = 'tollfree';
   } else if (numberType === 'mobile' && data.mobile) {
     if (specificAreaCode !== 'random' && Array.isArray(data.mobile)) {
@@ -945,7 +1090,7 @@ const generateNumber = (country, numberType, format, specificAreaCode = 'random'
     } else {
       areaCode = data.mobile[randomInt(0, data.mobile.length - 1)];
     }
-    number = String(randomInt(10000000, 99999999));
+    number = generateRandomNumber(numLength);
     type = 'mobile';
   } else if (data.areaCodes) {
     if (specificAreaCode !== 'random') {
@@ -954,17 +1099,17 @@ const generateNumber = (country, numberType, format, specificAreaCode = 'random'
     } else {
       areaCode = data.areaCodes[randomInt(0, data.areaCodes.length - 1)].code;
     }
-    number = String(randomInt(1000000, 9999999));
+    number = generateRandomNumber(numLength);
     type = numberType === 'mobile' ? 'mobile' : 'landline';
   } else {
-    // For countries without specific area codes (like Norway, Denmark)
+    // For countries without specific area codes
     areaCode = '';
-    number = String(randomInt(10000000, 99999999));
+    number = generateRandomNumber(numLength);
     type = numberType;
   }
 
   return {
-    number: formatNumber(data.code, areaCode, number, format),
+    number: formatNumber(data.code, areaCode, number, format, country),
     areaCode: areaCode,
     type,
   };

@@ -48,14 +48,30 @@ export default function IpFinder() {
 
     try {
       // Using ip-api.com - free, no API key required, real-time data
-      const response = await fetch(`http://ip-api.com/json/${searchIp.trim()}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,query`);
+      const response = await fetch(`https://ipapi.co/${searchIp.trim()}/json/`);
       const data = await response.json();
 
-      if (data.status === 'fail') {
-        setAddressError(data.message || 'Failed to fetch location data');
+      if (data.error) {
+        setAddressError(data.reason || 'Failed to fetch location data');
         setAddressData(null);
       } else {
-        setAddressData(data);
+        // Map ipapi.co response to match our existing structure
+        const mappedData = {
+          query: data.ip,
+          country: data.country_name,
+          countryCode: data.country_code,
+          region: data.region_code,
+          regionName: data.region,
+          city: data.city,
+          zip: data.postal,
+          lat: data.latitude,
+          lon: data.longitude,
+          timezone: data.timezone,
+          isp: data.org,
+          org: data.org,
+          as: data.asn
+        };
+        setAddressData(mappedData);
       }
     } catch (error) {
       setAddressError('Network error. Please try again.');

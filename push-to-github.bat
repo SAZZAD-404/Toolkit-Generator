@@ -38,13 +38,13 @@ echo.
 
 REM Commit
 echo [3/5] Committing files...
-git commit -m "Initial commit: Web Toolkit Generators - Gmail, User Agent, IP & Number Generator"
+git commit -m "Initial commit: Toolkit Generator"
 echo.
 
 REM Add remote
 echo [4/5] Adding GitHub remote...
 git remote remove origin 2>nul
-git remote add origin https://github.com/SAZZAD-404/Toolkit-Generators.git
+git remote add origin https://github.com/SAZZAD-404/Toolkit-Generator.git
 echo.
 
 REM Set main branch and push
@@ -58,7 +58,7 @@ echo   SUCCESS!
 echo ========================================
 echo.
 echo Your code has been pushed to:
-echo https://github.com/SAZZAD-404/Toolkit-Generators
+echo https://github.com/SAZZAD-404/Toolkit-Generator
 echo.
 echo Visit the URL to see your repository!
 echo.
