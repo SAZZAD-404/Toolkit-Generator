@@ -19,14 +19,14 @@ export default function GmailGenerator() {
   };
 
   const handleCopy = (text) => {
-    if (text) {
-      // Copy individual email
-      navigator.clipboard.writeText(text);
-    } else {
-      // Copy all data
-      const allData = results.map(r => `${r.firstName}\t${r.lastName}\t${r.email}`).join('\n');
-      navigator.clipboard.writeText(allData);
-    }
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyAll = () => {
+    const allEmails = results.map(r => r.email).join('\n');
+    navigator.clipboard.writeText(allEmails);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -305,7 +305,7 @@ export default function GmailGenerator() {
                   Clear Results
                 </Button>
                 <Button
-                  onClick={handleCopy}
+                  onClick={handleCopyAll}
                   className="flex-1 sm:flex-auto gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   <Copy size={16} className={copied ? 'opacity-0' : 'opacity-100'} />
