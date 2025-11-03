@@ -232,9 +232,6 @@ export default function GmailGenerator() {
                           <th className="py-3 px-4 text-left text-xs font-semibold text-slate-200 uppercase tracking-wider">
                             Status
                           </th>
-                          <th className="py-3 px-4 text-center text-xs font-semibold text-slate-200 uppercase tracking-wider">
-                            Action
-                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-700">
@@ -257,25 +254,29 @@ export default function GmailGenerator() {
                             >
                               {result.lastName}
                             </td>
-                            <td className="py-3 px-4 text-sm font-mono text-slate-300">
+                            <td
+                              className="py-3 px-4 text-sm font-mono text-slate-300 cursor-pointer hover:bg-slate-600/50 hover:text-indigo-300 transition-colors"
+                              onClick={() => handleCopy(result.email)}
+                              title="Click to copy email"
+                            >
                               {result.email}
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2">
                                 <span
                                   className={`w-2 h-2 rounded-full ${result.availability === 'available'
-                                      ? 'bg-green-500'
-                                      : result.availability === 'uncertain'
-                                        ? 'bg-yellow-500'
-                                        : 'bg-red-500'
+                                    ? 'bg-green-500'
+                                    : result.availability === 'uncertain'
+                                      ? 'bg-yellow-500'
+                                      : 'bg-red-500'
                                     }`}
                                 ></span>
                                 <span
                                   className={`text-sm font-medium ${result.availability === 'available'
-                                      ? 'text-green-400'
-                                      : result.availability === 'uncertain'
-                                        ? 'text-yellow-400'
-                                        : 'text-red-400'
+                                    ? 'text-green-400'
+                                    : result.availability === 'uncertain'
+                                      ? 'text-yellow-400'
+                                      : 'text-red-400'
                                     }`}
                                 >
                                   {result.availability === 'available'
@@ -285,15 +286,6 @@ export default function GmailGenerator() {
                                       : 'Likely Taken'}
                                 </span>
                               </div>
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <button
-                                onClick={() => handleCopy(result.email)}
-                                className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-slate-600 text-slate-400 hover:text-slate-100 transition-colors"
-                                title="Copy email"
-                              >
-                                <Copy size={16} />
-                              </button>
                             </td>
                           </tr>
                         ))}
