@@ -8,7 +8,7 @@ import { generatePhoneNumbers, getAreaCodesForCountry } from '../utils/numberGen
 export default function NumberGenerator() {
   const [country, setCountry] = useState('usa');
   const [numberType, setNumberType] = useState('mobile');
-  const [format, setFormat] = useState('formatted');
+  const [format, setFormat] = useState('plain');
   const [count, setCount] = useState(5);
   const [areaCode, setAreaCode] = useState('random');
   const [areaCodeSearch, setAreaCodeSearch] = useState('');
@@ -303,9 +303,6 @@ export default function NumberGenerator() {
                           <th className="py-3 px-4 text-left text-xs font-semibold text-slate-200 uppercase tracking-wider">
                             Phone Number
                           </th>
-                          <th className="py-3 px-4 text-center text-xs font-semibold text-slate-200 uppercase tracking-wider">
-                            Action
-                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-700">
@@ -317,7 +314,11 @@ export default function NumberGenerator() {
                             <td className="py-3 px-4 text-sm text-slate-400 font-medium">
                               {index + 1}
                             </td>
-                            <td className="py-3 px-4">
+                            <td
+                              className="py-3 px-4 cursor-pointer hover:bg-slate-600/50 transition-colors"
+                              onClick={() => handleCopy(result.number)}
+                              title="Click to copy phone number"
+                            >
                               <span
                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${result.type === 'mobile'
                                   ? 'bg-blue-900/50 text-blue-300 border border-blue-700'
@@ -330,22 +331,21 @@ export default function NumberGenerator() {
                                 {result.type}
                               </span>
                             </td>
-                            <td className="py-3 px-4">
+                            <td
+                              className="py-3 px-4 cursor-pointer hover:bg-slate-600/50 transition-colors"
+                              onClick={() => handleCopy(result.number)}
+                              title="Click to copy phone number"
+                            >
                               <span className="font-mono text-sm font-semibold text-indigo-400">
                                 {result.areaCode || 'N/A'}
                               </span>
                             </td>
-                            <td className="py-3 px-4 font-mono text-sm font-medium text-slate-300">
+                            <td
+                              className="py-3 px-4 font-mono text-sm font-medium text-slate-300 cursor-pointer hover:bg-slate-600/50 hover:text-indigo-300 transition-colors"
+                              onClick={() => handleCopy(result.number)}
+                              title="Click to copy phone number"
+                            >
                               {result.number}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <button
-                                onClick={() => handleCopy(result.number)}
-                                className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-slate-600 text-slate-400 hover:text-slate-100 transition-colors"
-                                title="Copy number"
-                              >
-                                <Copy size={16} />
-                              </button>
                             </td>
                           </tr>
                         ))}
