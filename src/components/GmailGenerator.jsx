@@ -31,6 +31,12 @@ export default function GmailGenerator() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyName = (name) => {
+    navigator.clipboard.writeText(name);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleClear = () => {
     setResults([]);
   };
@@ -237,10 +243,18 @@ export default function GmailGenerator() {
                             key={index}
                             className="hover:bg-slate-700/30 transition-colors"
                           >
-                            <td className="py-3 px-4 text-sm font-medium text-slate-100 capitalize">
+                            <td
+                              className="py-3 px-4 text-sm font-medium text-slate-100 capitalize cursor-pointer hover:bg-slate-600/50 hover:text-indigo-300 transition-colors"
+                              onClick={() => handleCopyName(result.firstName)}
+                              title="Click to copy first name"
+                            >
                               {result.firstName}
                             </td>
-                            <td className="py-3 px-4 text-sm font-medium text-slate-100 capitalize">
+                            <td
+                              className="py-3 px-4 text-sm font-medium text-slate-100 capitalize cursor-pointer hover:bg-slate-600/50 hover:text-indigo-300 transition-colors"
+                              onClick={() => handleCopyName(result.lastName)}
+                              title="Click to copy last name"
+                            >
                               {result.lastName}
                             </td>
                             <td className="py-3 px-4 text-sm font-mono text-slate-300">
@@ -249,28 +263,26 @@ export default function GmailGenerator() {
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2">
                                 <span
-                                  className={`w-2 h-2 rounded-full ${
-                                    result.availability === 'available'
+                                  className={`w-2 h-2 rounded-full ${result.availability === 'available'
                                       ? 'bg-green-500'
                                       : result.availability === 'uncertain'
-                                      ? 'bg-yellow-500'
-                                      : 'bg-red-500'
-                                  }`}
+                                        ? 'bg-yellow-500'
+                                        : 'bg-red-500'
+                                    }`}
                                 ></span>
                                 <span
-                                  className={`text-sm font-medium ${
-                                    result.availability === 'available'
+                                  className={`text-sm font-medium ${result.availability === 'available'
                                       ? 'text-green-400'
                                       : result.availability === 'uncertain'
-                                      ? 'text-yellow-400'
-                                      : 'text-red-400'
-                                  }`}
+                                        ? 'text-yellow-400'
+                                        : 'text-red-400'
+                                    }`}
                                 >
                                   {result.availability === 'available'
                                     ? 'Likely Available'
                                     : result.availability === 'uncertain'
-                                    ? 'Uncertain'
-                                    : 'Likely Taken'}
+                                      ? 'Uncertain'
+                                      : 'Likely Taken'}
                                 </span>
                               </div>
                             </td>
@@ -293,15 +305,15 @@ export default function GmailGenerator() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={handleClear} 
+                <Button
+                  variant="outline"
+                  onClick={handleClear}
                   className="flex-1 sm:flex-none sm:min-w-[150px]"
                 >
                   Clear Results
                 </Button>
-                <Button 
-                  onClick={handleCopy} 
+                <Button
+                  onClick={handleCopy}
                   className="flex-1 sm:flex-auto gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   <Copy size={16} className={copied ? 'opacity-0' : 'opacity-100'} />
