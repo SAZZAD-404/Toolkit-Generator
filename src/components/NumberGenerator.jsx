@@ -233,8 +233,8 @@ export default function NumberGenerator() {
               value={format}
               onChange={(e) => setFormat(e.target.value)}
               options={[
-                { value: 'formatted', label: '📋 Formatted (e.g., +1 (555) 123-4567)' },
                 { value: 'plain', label: '📝 Plain (e.g., 15551234567)' },
+                { value: 'formatted', label: '📋 Formatted (e.g., +1 (555) 123-4567)' },
                 { value: 'national', label: '🏠 National (e.g., (555) 123-4567)' },
               ]}
               className="w-full"
