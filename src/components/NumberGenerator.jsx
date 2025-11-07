@@ -159,6 +159,7 @@ export default function NumberGenerator() {
                   <div
                     id="areaCodeOptions"
                     className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-lg shadow-black/30 max-h-60 overflow-y-auto scrollbar-thin"
+                    onMouseDown={(e) => e.preventDefault()}
                   >
                     {/* Random Option */}
                     <div
@@ -187,7 +188,7 @@ export default function NumberGenerator() {
                             }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-mono font-semibold text-indigo-600">{ac.code}</span>
+                            <span className="font-mono font-semibold text-indigo-400">{ac.code}</span>
                             <span className="text-sm text-slate-300">{ac.location}</span>
                           </div>
                         </div>
