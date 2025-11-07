@@ -18,7 +18,7 @@ export default function UserAgentGenerator() {
   const handleGenerate = () => {
     if (device === 'mix') {
       // Generate 60% Android and 40% iOS
-      const androidCount = Math.round(count * 0.6);
+      const androidCount = Math.round(count * 0.5);
       const iosCount = count - androidCount;
 
       const androidUAs = generateUserAgents('android', browser, version, androidCount);
