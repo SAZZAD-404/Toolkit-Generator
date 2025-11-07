@@ -302,6 +302,9 @@ export default function NumberGenerator() {
                             Area Code
                           </th>
                           <th className="py-3 px-4 text-left text-xs font-semibold text-slate-200 uppercase tracking-wider">
+                            Location
+                          </th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-slate-200 uppercase tracking-wider">
                             Phone Number
                           </th>
                         </tr>
@@ -339,6 +342,15 @@ export default function NumberGenerator() {
                             >
                               <span className="font-mono text-sm font-semibold text-indigo-400">
                                 {result.areaCode || 'N/A'}
+                              </span>
+                            </td>
+                            <td
+                              className="py-3 px-4 cursor-pointer hover:bg-slate-600/50 transition-colors"
+                              onClick={() => handleCopy(result.number)}
+                              title="Click to copy phone number"
+                            >
+                              <span className="text-sm text-slate-300">
+                                {result.areaName || 'N/A'}
                               </span>
                             </td>
                             <td
