@@ -1313,44 +1313,54 @@ const generateRandomNumber = (length) => {
 
 const generateNumber = (country, numberType, format, specificAreaCode = 'random') => {
   const data = countryData[country];
-  let areaCode, number, type;
+  let areaCode, areaName, number, type;
   const totalLength = getTotalNumberLength(country, numberType);
 
   if (numberType === 'tollfree' && data.tollFree) {
+    let selectedArea;
     if (specificAreaCode !== 'random') {
       const found = data.tollFree.find(ac => ac.code === specificAreaCode);
-      areaCode = found ? found.code : data.tollFree[randomInt(0, data.tollFree.length - 1)].code;
+      selectedArea = found || data.tollFree[randomInt(0, data.tollFree.length - 1)];
     } else {
-      areaCode = data.tollFree[randomInt(0, data.tollFree.length - 1)].code;
+      selectedArea = data.tollFree[randomInt(0, data.tollFree.length - 1)];
     }
+    areaCode = selectedArea.code;
+    areaName = selectedArea.location;
     const numLength = totalLength - areaCode.length;
     number = generateRandomNumber(numLength);
     type = 'tollfree';
   } else if (numberType === 'mobile' && data.mobile) {
+    let selectedArea;
     if (specificAreaCode !== 'random' && Array.isArray(data.mobile)) {
       const found = data.mobile.find(ac => ac.code === specificAreaCode);
-      areaCode = found ? found.code : data.mobile[randomInt(0, data.mobile.length - 1)].code;
+      selectedArea = found || data.mobile[randomInt(0, data.mobile.length - 1)];
     } else if (Array.isArray(data.mobile)) {
-      areaCode = data.mobile[randomInt(0, data.mobile.length - 1)].code;
+      selectedArea = data.mobile[randomInt(0, data.mobile.length - 1)];
     } else {
-      areaCode = data.mobile[randomInt(0, data.mobile.length - 1)];
+      selectedArea = data.mobile[randomInt(0, data.mobile.length - 1)];
     }
+    areaCode = selectedArea.code;
+    areaName = selectedArea.location;
     const numLength = totalLength - areaCode.length;
     number = generateRandomNumber(numLength);
     type = 'mobile';
   } else if (data.areaCodes) {
+    let selectedArea;
     if (specificAreaCode !== 'random') {
       const found = data.areaCodes.find(ac => ac.code === specificAreaCode);
-      areaCode = found ? found.code : data.areaCodes[randomInt(0, data.areaCodes.length - 1)].code;
+      selectedArea = found || data.areaCodes[randomInt(0, data.areaCodes.length - 1)];
     } else {
-      areaCode = data.areaCodes[randomInt(0, data.areaCodes.length - 1)].code;
+      selectedArea = data.areaCodes[randomInt(0, data.areaCodes.length - 1)];
     }
+    areaCode = selectedArea.code;
+    areaName = selectedArea.location;
     const numLength = totalLength - areaCode.length;
     number = generateRandomNumber(numLength);
     type = numberType === 'mobile' ? 'mobile' : 'landline';
   } else {
     // For countries without specific area codes
     areaCode = '';
+    areaName = 'N/A';
     number = generateRandomNumber(totalLength);
     type = numberType;
   }
@@ -1358,6 +1368,7 @@ const generateNumber = (country, numberType, format, specificAreaCode = 'random'
   return {
     number: formatNumber(data.code, areaCode, number, format, country),
     areaCode: areaCode,
+    areaName: areaName,
     type,
   };
 };
