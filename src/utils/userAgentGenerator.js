@@ -13,12 +13,12 @@ const iosVersions = [
 ];
 
 const fbAppVersionsIOS = [
-  "534.1.0", "534.0.0", "533.0.0", "532.0.0", "531.0.0", "536.0.0", "537.0.0","535.0.0"
+  "534.1.0", "534.0.0", "533.0.0", "532.0.0", "531.0.0", "536.0.0", "537.0.0","535.0.0","536.0.0","537.0.0","538.0.0"
 ];
 
 const fbAppVersionsAndroid = [
   "530.0.0.48.74", "529.0.0.44.73", "535.0.0.49.72","536.0.0.46.77","534.0.0.56.76",
-  "532.0.0.55.71", "533.0.0.49.79", "531.0.0.47.70","536.1.0.58.77"
+  "532.0.0.55.71", "533.0.0.49.79", "531.0.0.47.70","536.1.0.58.77","537.0.0.47.77"
 ];
 
 // Facebook Lite versions (different from main FB)
@@ -119,15 +119,6 @@ const androidModels = [
   "V2250", "V2227", "V2185", // X90, X80, X70
   "V2231", "V2207", "V2162", // V29, V27, V25
   "V2206", "V2154", "V2120", // Y77, Y35, Y21
-
-  // 🌍 Infinix (Africa/Asia - More models)
-  "X6528", "X6739", "X6833", // Note 30, Hot 30, Zero 30
-  "X6711", "X6815", "X669D", // Smart 7, Hot 20, Note 12
-  "X6812", "X6710", "X665B", // Hot 12, Note 11, Smart 6
-
-  // 🌍 Tecno (Africa/Asia)
-  "TECNO-CK7n", "TECNO-KI5k", "TECNO-CH6n",
-  "TECNO-KG5j", "TECNO-KH7n", "TECNO-KG6p",
 
   // 🌏 Honor (China/Europe)
   "LGE-LX1", "ANY-NX1", "LSA-AN00", "ALI-AN00", "NTN-AN00", "BMH-AN10",
