@@ -141,7 +141,17 @@ const randMobileBuild = () => {
 function buildIOSUA() {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
-  const device = randChoice(iPhoneModels);
+  
+  // iOS 26+ should only use newer iPhone models (iPhone 15 and newer)
+  let compatibleModels = iPhoneModels;
+  if (iosVer.startsWith('26')) {
+    compatibleModels = iPhoneModels.filter(model => {
+      const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
+      return modelNum >= 15;
+    });
+  }
+  
+  const device = randChoice(compatibleModels);
   const fbav = randChoice(fbAppVersionsIOS);
   const fbav2 = `.${randInt(20, 40)}.${randInt(100, 250)}`;
   const fbbv = randInt(750000000, 770000000);
@@ -166,7 +176,17 @@ function buildIOSUA() {
 function buildIOSFBLiteUA() {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
-  const device = randChoice(iPhoneModels);
+  
+  // iOS 26+ should only use newer iPhone models (iPhone 15 and newer)
+  let compatibleModels = iPhoneModels;
+  if (iosVer.startsWith('26')) {
+    compatibleModels = iPhoneModels.filter(model => {
+      const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
+      return modelNum >= 15;
+    });
+  }
+  
+  const device = randChoice(compatibleModels);
   const fbav = randChoice(fbLiteVersionsIOS);
   const fbav2 = `.${randInt(10, 30)}.${randInt(50, 150)}`;
   const fbbv = randInt(650000000, 680000000);
@@ -187,7 +207,17 @@ function buildIOSFBLiteUA() {
 function buildIOSInstagramUA() {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
-  const device = randChoice(iPhoneModels);
+  
+  // iOS 26+ should only use newer iPhone models (iPhone 15 and newer)
+  let compatibleModels = iPhoneModels;
+  if (iosVer.startsWith('26')) {
+    compatibleModels = iPhoneModels.filter(model => {
+      const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
+      return modelNum >= 15;
+    });
+  }
+  
+  const device = randChoice(compatibleModels);
   const locale = randChoice(locales);
 
   // Instagram version format: 367.0.0.23.104
@@ -422,8 +452,19 @@ const generateAndroidUA = (browser, version) => {
 };
 
 const generateiPhoneUA = (browser, version) => {
-  const device = randChoice(iPhoneModels);
   const iOSVer = randChoice(iosVersions);
+  
+  // iOS 26+ should only use newer iPhone models (iPhone 15 and newer)
+  let compatibleModels = iPhoneModels;
+  if (iOSVer.startsWith('26')) {
+    // iPhone 15 and newer: iPhone15,4 onwards
+    compatibleModels = iPhoneModels.filter(model => {
+      const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
+      return modelNum >= 15;
+    });
+  }
+  
+  const device = randChoice(compatibleModels);
   const iosDot = iOSVer.replace(/_/g, '.');
   const { min, max } = browserVersions[browser]?.[version] || browserVersions.chrome[version];
   const browserVer = randInt(min, max);
