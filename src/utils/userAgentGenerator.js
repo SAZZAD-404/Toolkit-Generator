@@ -1,20 +1,33 @@
-// iOS Data
+// iOS Data - More variety
 const iPhoneModels = [
-  "iPhone12,1", "iPhone12,3", "iPhone12,5", "iPhone13,1", "iPhone13,2",
-  "iPhone13,3", "iPhone13,4", "iPhone14,4", "iPhone14,5", "iPhone14,2",
-  "iPhone14,3", "iPhone14,7", "iPhone14,8", "iPhone15,2", "iPhone15,3",
-  "iPhone15,4", "iPhone15,5", "iPhone16,1", "iPhone16,2", "iPhone17,1",
-  "iPhone17,2", "iPhone17,3", "iPhone17,4", "iPhone17,5", "iPhone18,1", 
-  "iPhone18,2", "iPhone18,4"
+  // iPhone 11 series
+  "iPhone12,1", "iPhone12,3", "iPhone12,5", "iPhone12,8",
+  // iPhone 12 series
+  "iPhone13,1", "iPhone13,2", "iPhone13,3", "iPhone13,4",
+  // iPhone 13 series
+  "iPhone14,2", "iPhone14,3", "iPhone14,4", "iPhone14,5", "iPhone14,6", "iPhone14,7", "iPhone14,8",
+  // iPhone 14 series
+  "iPhone15,2", "iPhone15,3", "iPhone15,4", "iPhone15,5",
+  // iPhone 15 series
+  "iPhone16,1", "iPhone16,2",
+  // iPhone 16 series
+  "iPhone17,1", "iPhone17,2", "iPhone17,3", "iPhone17,4", "iPhone17,5",
+  // iPhone 17 & 18 series (future)
+  "iPhone18,1", "iPhone18,2", "iPhone18,3", "iPhone18,4"
 ];
 
 const iosVersions = [
-  "17_0", "17_1", "17_2", "17_3", "17_4", "17_5",
-  "18_0", "18_1", "18_2", "18_3", "18_4", "18_5", "18_6", "18_6_1", "18_7_2", "26_0", "26_1"
+  // iOS 16
+  "16_0", "16_1", "16_2", "16_3", "16_4", "16_5", "16_6", "16_7",
+  // iOS 17
+  "17_0", "17_0_1", "17_1", "17_1_1", "17_2", "17_2_1", "17_3", "17_3_1", "17_4", "17_4_1", "17_5", "17_5_1", "17_6", "17_6_1",
+  // iOS 18
+  "18_0", "18_0_1", "18_1", "18_1_1", "18_2", "18_2_1", "18_3", "18_4", "18_5", "18_6", "18_6_1", "18_7", "18_7_1", "18_7_2", "26_0", "26_1"
 ];
 
 const fbAppVersionsIOS = [
-  "534.1.0", "534.0.0", "533.0.0", "536.0.0", "537.0.0","535.0.0","536.0.0","537.0.0","538.0.0","539.0.0"
+  "530.0.0", "531.0.0", "532.0.0", "533.0.0", "534.0.0", "534.1.0", 
+  "535.0.0", "536.0.0", "537.0.0", "538.0.0", "539.0.0", "540.0.0"
 ];
 
 const fbAppVersionsAndroid = [
@@ -142,25 +155,17 @@ function buildIOSUA() {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
   
-  // iOS 26+ should only use newer iPhone models (iPhone 15 and newer)
-  let compatibleModels = iPhoneModels;
-  if (iosVer.startsWith('26')) {
-    compatibleModels = iPhoneModels.filter(model => {
-      const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
-      return modelNum >= 15;
-    });
-  }
-  
-  const device = randChoice(compatibleModels);
+  // All models are compatible now - fully random
+  const device = randChoice(iPhoneModels);
   const fbav = randChoice(fbAppVersionsIOS);
-  const fbav2 = `.${randInt(20, 40)}.${randInt(100, 250)}`;
-  const fbbv = randInt(750000000, 770000000);
+  const fbav2 = `.${randInt(15, 45)}.${randInt(80, 280)}`;
+  const fbbv = randInt(740000000, 780000000);
   const locale = randChoice(locales);
   const build = randMobileBuild();
-  const fbss = randChoice([2, 3, 4]); // Added 4 for variety
+  const fbss = randChoice([2, 3, 4]); // Screen scale
   
   // Random WebKit version variations
-  const webkitVersions = ['605.1.15', '606.1.15', '605.2.15', '606.2.15'];
+  const webkitVersions = ['605.1.15', '606.1.15', '605.2.15', '606.2.15', '607.1.15', '607.2.15'];
   const webkit = randChoice(webkitVersions);
 
   // Randomize FBOP and FBRV combinations
@@ -189,14 +194,14 @@ function buildIOSUA() {
 
   // Random FBCR (carrier) - sometimes included
   let fbcrPart = '';
-  if (Math.random() < 0.3) {
-    const carriers = ['Verizon', 'AT&T', 'T-Mobile', 'Sprint', 'Vodafone', 'O2', 'EE'];
+  if (Math.random() < 0.35) {
+    const carriers = ['Verizon', 'AT&T', 'T-Mobile', 'Sprint', 'Vodafone', 'O2', 'EE', 'Orange', 'Three'];
     fbcrPart = `;FBCR/${randChoice(carriers)}`;
   }
 
   // Random FBMF (manufacturer) - sometimes included
   let fbmfPart = '';
-  if (Math.random() < 0.2) {
+  if (Math.random() < 0.25) {
     fbmfPart = ';FBMF/Apple';
   }
 
@@ -208,30 +213,26 @@ function buildIOSFBLiteUA() {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
   
-  // iOS 26+ should only use newer iPhone models (iPhone 15 and newer)
-  let compatibleModels = iPhoneModels;
-  if (iosVer.startsWith('26')) {
-    compatibleModels = iPhoneModels.filter(model => {
-      const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
-      return modelNum >= 15;
-    });
-  }
-  
-  const device = randChoice(compatibleModels);
+  // All models are compatible now - fully random
+  const device = randChoice(iPhoneModels);
   const fbav = randChoice(fbLiteVersionsIOS);
-  const fbav2 = `.${randInt(10, 30)}.${randInt(50, 150)}`;
-  const fbbv = randInt(650000000, 680000000);
+  const fbav2 = `.${randInt(8, 35)}.${randInt(40, 180)}`;
+  const fbbv = randInt(640000000, 690000000);
   const locale = randChoice(locales);
   const build = randMobileBuild();
-  const fbss = randChoice([2, 3]);
+  const fbss = randChoice([2, 3, 4]);
+  
+  // Random WebKit version
+  const webkitVersions = ['60ite.15', '606.1.15', '605.2.15', '606.2.15'];
+  const webkit = randChoice(webkitVersions);
 
   let fbrvPart = '';
-  if (Math.random() < 0.7) {
+  if (Math.random() < 0.75) {
     const fbrvUnique = randInt(100000000, 999999999);
     fbrvPart = `;FBRV/${fbrvUnique}`;
   }
 
-  return `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVer} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/${build} [FBAN/MessengerLiteForiOS;FBAV/${fbav}${fbav2};FBBV/${fbbv};FBDV/${device};FBMD/iPhone;FBSN/iOS;FBSV/${iosDot};FBSS/${fbss};FBID/phone;FBLC/${locale};FBOP/0${fbrvPart}]`;
+  return `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVer} like Mac OS X) AppleWebKit/${webkit} (KHTML, like Gecko) Mobile/${build} [FBAN/MessengerLiteForiOS;FBAV/${fbav}${fbav2};FBBV/${fbbv};FBDV/${device};FBMD/iPhone;FBSN/iOS;FBSV/${iosDot};FBSS/${fbss};FBID/phone;FBLC/${locale};FBOP/0${fbrvPart}]`;
 }
 
 // Generate iOS UA for Instagram (Real Instagram Format)
@@ -239,16 +240,8 @@ function buildIOSInstagramUA() {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
   
-  // iOS 26+ should only use newer iPhone models (iPhone 15 and newer)
-  let compatibleModels = iPhoneModels;
-  if (iosVer.startsWith('26')) {
-    compatibleModels = iPhoneModels.filter(model => {
-      const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
-      return modelNum >= 15;
-    });
-  }
-  
-  const device = randChoice(compatibleModels);
+  // All models are compatible now - fully random
+  const device = randChoice(iPhoneModels);
   const locale = randChoice(locales);
 
   // Instagram version format: 367.0.0.23.104
@@ -401,7 +394,6 @@ function buildAndroidInstagramUA() {
 
   // Manufacturer and model name
   const manufacturers = [
-    { name: 'INFINIX', prefix: 'Infinix' },
     { name: 'SAMSUNG', prefix: 'samsung' },
     { name: 'XIAOMI', prefix: 'Xiaomi' },
     { name: 'OPPO', prefix: 'OPPO' },
@@ -485,17 +477,8 @@ const generateAndroidUA = (browser, version) => {
 const generateiPhoneUA = (browser, version) => {
   const iOSVer = randChoice(iosVersions);
   
-  // iOS 26+ should only use newer iPhone models (iPhone 15 and newer)
-  let compatibleModels = iPhoneModels;
-  if (iOSVer.startsWith('26')) {
-    // iPhone 15 and newer: iPhone15,4 onwards
-    compatibleModels = iPhoneModels.filter(model => {
-      const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
-      return modelNum >= 11;
-    });
-  }
-  
-  const device = randChoice(compatibleModels);
+  // All models are compatible now - fully random
+  const device = randChoice(iPhoneModels);
   const iosDot = iOSVer.replace(/_/g, '.');
   const { min, max } = browserVersions[browser]?.[version] || browserVersions.chrome[version];
   const browserVer = randInt(min, max);
