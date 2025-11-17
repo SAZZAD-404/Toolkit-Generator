@@ -164,10 +164,10 @@ export default function UserAgentGenerator() {
               value={browser}
               onChange={(e) => setBrowser(e.target.value)}
               options={[
-                { value: 'chrome', label: 'Chrome Mobile (Latest 2025)' },
-                { value: 'facebook', label: 'Facebook App (v529-534)' },
-                { value: 'facebook_lite', label: 'Facebook Lite (v428-434)' },
-                { value: 'instagram', label: 'Instagram App (v358-364)' },
+                { value: 'chrome', label: 'Chrome Mobile' },
+                { value: 'facebook', label: 'Facebook App' },
+                { value: 'facebook_lite', label: 'Facebook Lite' },
+                { value: 'instagram', label: 'Instagram App' },
                 { value: 'opera', label: 'Opera Mobile' },
                 { value: 'uc', label: 'UC Browser' },
                 { value: 'samsung', label: 'Samsung Internet' },
