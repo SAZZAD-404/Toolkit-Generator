@@ -460,7 +460,7 @@ const generateiPhoneUA = (browser, version) => {
     // iPhone 15 and newer: iPhone15,4 onwards
     compatibleModels = iPhoneModels.filter(model => {
       const modelNum = parseInt(model.split(',')[0].replace('iPhone', ''));
-      return modelNum >= 15;
+      return modelNum >= 11;
     });
   }
   
