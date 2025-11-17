@@ -157,19 +157,50 @@ function buildIOSUA() {
   const fbbv = randInt(750000000, 770000000);
   const locale = randChoice(locales);
   const build = randMobileBuild();
-  const fbss = randChoice([2, 3]);
+  const fbss = randChoice([2, 3, 4]); // Added 4 for variety
+  
+  // Random WebKit version variations
+  const webkitVersions = ['605.1.15', '606.1.15', '605.2.15', '606.2.15'];
+  const webkit = randChoice(webkitVersions);
 
-  let extra = '';
+  // Randomize FBOP and FBRV combinations
+  let fbopPart = '';
   let fbrvPart = '';
-
-  if (Math.random() < 0.1) {
-    extra = ';FBOP/80';
+  let iabmvPart = '';
+  
+  const randomType = Math.random();
+  
+  if (randomType < 0.15) {
+    // 15% - FBOP/80 only
+    fbopPart = ';FBOP/80';
+  } else if (randomType < 0.35) {
+    // 20% - FBOP/5 with FBRV only
+    fbopPart = ';FBOP/5';
+    fbrvPart = `;FBRV/${randInt(100000000, 999999999)}`;
+  } else if (randomType < 0.70) {
+    // 35% - FBOP/5 with FBRV and IABMV/1
+    fbopPart = ';FBOP/5';
+    fbrvPart = `;FBRV/${randInt(100000000, 999999999)}`;
+    iabmvPart = ';IABMV/1';
   } else {
-    const fbrvUnique = randInt(100000000, 999999999);
-    fbrvPart = `;FBOP/5;FBRV/${fbrvUnique};IABMV/1`;
+    // 30% - No FBOP/FBRV (older style)
+    fbopPart = '';
   }
 
-  return `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVer} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/${build} [FBAN/FBIOS;FBAV/${fbav}${fbav2};FBBV/${fbbv};FBDV/${device};FBMD/iPhone;FBSN/iOS;FBSV/${iosDot};FBSS/${fbss};FBID/phone;FBLC/${locale}${extra}${fbrvPart}]`;
+  // Random FBCR (carrier) - sometimes included
+  let fbcrPart = '';
+  if (Math.random() < 0.3) {
+    const carriers = ['Verizon', 'AT&T', 'T-Mobile', 'Sprint', 'Vodafone', 'O2', 'EE'];
+    fbcrPart = `;FBCR/${randChoice(carriers)}`;
+  }
+
+  // Random FBMF (manufacturer) - sometimes included
+  let fbmfPart = '';
+  if (Math.random() < 0.2) {
+    fbmfPart = ';FBMF/Apple';
+  }
+
+  return `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVer} like Mac OS X) AppleWebKit/${webkit} (KHTML, like Gecko) Mobile/${build} [FBAN/FBIOS;FBAV/${fbav}${fbav2};FBBV/${fbbv};FBDV/${device};FBMD/iPhone;FBSN/iOS;FBSV/${iosDot};FBSS/${fbss};FBID/phone;FBLC/${locale}${fbcrPart}${fbmfPart}${fbopPart}${fbrvPart}${iabmvPart}]`;
 }
 
 // Generate iOS UA for Facebook Lite (Messenger Lite style)
