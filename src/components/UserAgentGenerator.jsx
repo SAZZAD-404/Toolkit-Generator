@@ -21,8 +21,25 @@ export default function UserAgentGenerator() {
       const androidCount = Math.round(count * 0.6);
       const iosCount = count - androidCount;
 
-      const androidUAs = generateUserAgents('android', browser, version, androidCount);
-      const iosUAs = generateUserAgents('iphone', browser, version, iosCount);
+      // Handle version mix
+      let androidUAs, iosUAs;
+      if (version === 'mix') {
+        // Generate mixed versions for Android
+        androidUAs = [];
+        for (let i = 0; i < androidCount; i++) {
+          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+          androidUAs.push(...generateUserAgents('android', browser, randomVersion, 1));
+        }
+        // Generate mixed versions for iOS
+        iosUAs = [];
+        for (let i = 0; i < iosCount; i++) {
+          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+          iosUAs.push(...generateUserAgents('iphone', browser, randomVersion, 1));
+        }
+      } else {
+        androidUAs = generateUserAgents('android', browser, version, androidCount);
+        iosUAs = generateUserAgents('iphone', browser, version, iosCount);
+      }
 
       // Mix them together randomly with same order
       const combined = [...androidUAs.map((ua) => ({ ua, device: 'android' })),
@@ -32,7 +49,17 @@ export default function UserAgentGenerator() {
       setResults(shuffled.map(item => item.ua));
       setResultDevices(shuffled.map(item => item.device));
     } else {
-      const generated = generateUserAgents(device, browser, version, count);
+      // Handle version mix for single device
+      let generated;
+      if (version === 'mix') {
+        generated = [];
+        for (let i = 0; i < count; i++) {
+          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+          generated.push(...generateUserAgents(device, browser, randomVersion, 1));
+        }
+      } else {
+        generated = generateUserAgents(device, browser, version, count);
+      }
       setResults(generated);
       setResultDevices(Array(count).fill(device));
     }
@@ -164,10 +191,10 @@ export default function UserAgentGenerator() {
               value={browser}
               onChange={(e) => setBrowser(e.target.value)}
               options={[
-                { value: 'chrome', label: 'Chrome Mobile' },
-                { value: 'facebook', label: 'Facebook App' },
-                { value: 'facebook_lite', label: 'Facebook Lite' },
-                { value: 'instagram', label: 'Instagram App' },
+                { value: 'chrome', label: 'Chrome Mobile (Latest 2025)' },
+                { value: 'facebook', label: 'Facebook App (v529-534)' },
+                { value: 'facebook_lite', label: 'Facebook Lite (v428-434)' },
+                { value: 'instagram', label: 'Instagram App (v358-364)' },
                 { value: 'opera', label: 'Opera Mobile' },
                 { value: 'uc', label: 'UC Browser' },
                 { value: 'samsung', label: 'Samsung Internet' },
@@ -185,7 +212,7 @@ export default function UserAgentGenerator() {
                 {version}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               <Button
                 variant={version === 'latest' ? 'default' : 'outline'}
                 onClick={() => setVersion('latest')}
@@ -206,6 +233,13 @@ export default function UserAgentGenerator() {
                 className="transition-all duration-200 h-11"
               >
                 ⏰ Old
+              </Button>
+              <Button
+                variant={version === 'mix' ? 'default' : 'outline'}
+                onClick={() => setVersion('mix')}
+                className="transition-all duration-200 h-11"
+              >
+                🔀 Mix
               </Button>
             </div>
           </div>
