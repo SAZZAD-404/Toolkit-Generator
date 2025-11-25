@@ -14,6 +14,7 @@ export default function GmailGenerator() {
   const [country, setCountry] = useState('usa');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { addToast } = useToast();
   const { recordGeneration } = useStats();
 
@@ -37,6 +38,8 @@ export default function GmailGenerator() {
   const handleCopyAll = () => {
     const allEmails = results.map(r => r.email).join('\n');
     navigator.clipboard.writeText(allEmails);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
     addToast(`${results.length} emails copied!`, 'success');
   };
 
