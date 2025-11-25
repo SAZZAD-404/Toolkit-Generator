@@ -3,7 +3,6 @@ import { Copy, Smartphone, Download } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Card';
 import { Button } from './Button';
 import { Select } from './Select';
-import TemplateManager from './TemplateManager';
 import { generateUserAgents } from '../utils/userAgentGenerator';
 import { useToast } from '../context/ToastContext';
 import { useStats } from '../context/StatsContext';
@@ -21,24 +20,6 @@ export default function UserAgentGenerator() {
   const iosPercent = 100 - androidPercent;
   const { addToast } = useToast();
   const { recordGeneration } = useStats();
-
-  // Get current configuration for template saving
-  const getCurrentConfig = () => ({
-    device,
-    browser,
-    version,
-    count,
-    androidPercent
-  });
-
-  // Handle loading a template
-  const handleLoadTemplate = (config) => {
-    if (config.device !== undefined) setDevice(config.device);
-    if (config.browser !== undefined) setBrowser(config.browser);
-    if (config.version !== undefined) setVersion(config.version);
-    if (config.count !== undefined) setCount(config.count);
-    if (config.androidPercent !== undefined) setAndroidPercent(config.androidPercent);
-  };
 
   const handleGenerate = () => {
     if (device === 'mix') {
@@ -171,13 +152,6 @@ export default function UserAgentGenerator() {
 
       <CardContent>
         <div className="space-y-6">
-          {/* Template Manager */}
-          <TemplateManager
-            generatorType="useragent"
-            currentConfig={getCurrentConfig()}
-            onLoadTemplate={handleLoadTemplate}
-          />
-
           {/* Device Selection */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
