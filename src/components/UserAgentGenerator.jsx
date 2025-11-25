@@ -3,8 +3,10 @@ import { Copy, Smartphone, Download } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Card';
 import { Button } from './Button';
 import { Select } from './Select';
+import TemplateManager from './TemplateManager';
 import { generateUserAgents } from '../utils/userAgentGenerator';
 import { useToast } from '../context/ToastContext';
+import { useStats } from '../context/StatsContext';
 
 export default function UserAgentGenerator() {
   const [device, setDevice] = useState('android');
@@ -14,62 +16,81 @@ export default function UserAgentGenerator() {
   const [results, setResults] = useState([]);
   const [resultDevices, setResultDevices] = useState([]);
   const [copiedIndex, setCopiedIndex] = useState(null);
+  const [copied, setCopied] = useState(false);
   const [androidPercent, setAndroidPercent] = useState(60);
-  const [isLoading, setIsLoading] = useState(false);
   const iosPercent = 100 - androidPercent;
   const { addToast } = useToast();
+  const { recordGeneration } = useStats();
+
+  // Get current configuration for template saving
+  const getCurrentConfig = () => ({
+    device,
+    browser,
+    version,
+    count,
+    androidPercent
+  });
+
+  // Handle loading a template
+  const handleLoadTemplate = (config) => {
+    if (config.device !== undefined) setDevice(config.device);
+    if (config.browser !== undefined) setBrowser(config.browser);
+    if (config.version !== undefined) setVersion(config.version);
+    if (config.count !== undefined) setCount(config.count);
+    if (config.androidPercent !== undefined) setAndroidPercent(config.androidPercent);
+  };
 
   const handleGenerate = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      if (device === 'mix') {
-        const androidCount = Math.round(count * (androidPercent / 100));
-        const iosCount = count - androidCount;
+    if (device === 'mix') {
+      const androidCount = Math.round(count * (androidPercent / 100));
+      const iosCount = count - androidCount;
 
-        let androidUAs, iosUAs;
-        if (version === 'mix') {
-          androidUAs = [];
-          for (let i = 0; i < androidCount; i++) {
-            const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-            androidUAs.push(...generateUserAgents('android', browser, randomVersion, 1));
-          }
-          iosUAs = [];
-          for (let i = 0; i < iosCount; i++) {
-            const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-            iosUAs.push(...generateUserAgents('iphone', browser, randomVersion, 1));
-          }
-        } else {
-          androidUAs = generateUserAgents('android', browser, version, androidCount);
-          iosUAs = generateUserAgents('iphone', browser, version, iosCount);
+      let androidUAs, iosUAs;
+      if (version === 'mix') {
+        androidUAs = [];
+        for (let i = 0; i < androidCount; i++) {
+          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+          androidUAs.push(...generateUserAgents('android', browser, randomVersion, 1));
         }
-
-        const combined = [...androidUAs.map((ua) => ({ ua, device: 'android' })),
-        ...iosUAs.map((ua) => ({ ua, device: 'iphone' }))];
-        const shuffled = combined.sort(() => Math.random() - 0.5);
-
-        setResults(shuffled.map(item => item.ua));
-        setResultDevices(shuffled.map(item => item.device));
+        iosUAs = [];
+        for (let i = 0; i < iosCount; i++) {
+          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+          iosUAs.push(...generateUserAgents('iphone', browser, randomVersion, 1));
+        }
       } else {
-        let generated;
-        if (version === 'mix') {
-          generated = [];
-          for (let i = 0; i < count; i++) {
-            const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-            generated.push(...generateUserAgents(device, browser, randomVersion, 1));
-          }
-        } else {
-          generated = generateUserAgents(device, browser, version, count);
-        }
-        setResults(generated);
-        setResultDevices(Array(count).fill(device));
+        androidUAs = generateUserAgents('android', browser, version, androidCount);
+        iosUAs = generateUserAgents('iphone', browser, version, iosCount);
       }
-      setIsLoading(false);
-      addToast(`${count} user agents generated!`, 'success');
-    }, 300);
+
+      const combined = [...androidUAs.map((ua) => ({ ua, device: 'android' })),
+      ...iosUAs.map((ua) => ({ ua, device: 'iphone' }))];
+      const shuffled = combined.sort(() => Math.random() - 0.5);
+
+      setResults(shuffled.map(item => item.ua));
+      setResultDevices(shuffled.map(item => item.device));
+    } else {
+      let generated;
+      if (version === 'mix') {
+        generated = [];
+        for (let i = 0; i < count; i++) {
+          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+          generated.push(...generateUserAgents(device, browser, randomVersion, 1));
+        }
+      } else {
+        generated = generateUserAgents(device, browser, version, count);
+      }
+      setResults(generated);
+      setResultDevices(Array(count).fill(device));
+    }
+    // Record statistics
+    recordGeneration('useragent', count);
+    addToast(`${count} user agents generated!`, 'success');
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(results.join('\n'));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
     addToast(`${results.length} user agents copied!`, 'success');
   };
 
@@ -150,6 +171,13 @@ export default function UserAgentGenerator() {
 
       <CardContent>
         <div className="space-y-6">
+          {/* Template Manager */}
+          <TemplateManager
+            generatorType="useragent"
+            currentConfig={getCurrentConfig()}
+            onLoadTemplate={handleLoadTemplate}
+          />
+
           {/* Device Selection */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">

@@ -5,6 +5,7 @@ import { Button } from './Button';
 import { Select } from './Select';
 import { generateGmailUsernames } from '../utils/gmailGenerator';
 import { useToast } from '../context/ToastContext';
+import { useStats } from '../context/StatsContext';
 
 export default function GmailGenerator() {
   const [gender, setGender] = useState('both');
@@ -14,6 +15,7 @@ export default function GmailGenerator() {
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const { addToast } = useToast();
+  const { recordGeneration } = useStats();
 
   const handleGenerate = () => {
     setIsLoading(true);
@@ -21,6 +23,8 @@ export default function GmailGenerator() {
       const generated = generateGmailUsernames(gender, country, style, count);
       setResults(generated);
       setIsLoading(false);
+      // Record statistics
+      recordGeneration('gmail', count);
       addToast(`${count} emails generated successfully!`, 'success');
     }, 300);
   };
