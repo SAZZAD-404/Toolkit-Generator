@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Copy, Smartphone, Download } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Card';
 import { Button } from './Button';
@@ -14,11 +14,13 @@ export default function UserAgentGenerator() {
   const [resultDevices, setResultDevices] = useState([]);
   const [copied, setCopied] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState(null);
+  const [androidPercent, setAndroidPercent] = useState(60);
+  const iosPercent = 100 - androidPercent;
 
   const handleGenerate = () => {
     if (device === 'mix') {
-      // Generate 60% Android and 40% iOS
-      const androidCount = Math.round(count * 0.6);
+      // Generate based on user-defined percentages
+      const androidCount = Math.round(count * (androidPercent / 100));
       const iosCount = count - androidCount;
 
       // Handle version mix
@@ -151,7 +153,7 @@ export default function UserAgentGenerator() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-slate-100">Device Platform</h3>
               <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded">
-                {device === 'android' ? '📱 Android' : device === 'iphone' ? '🍎 iOS' : '🔀 Mix (60% Android, 40% iOS)'}
+                {device === 'android' ? '📱 Android' : device === 'iphone' ? '🍎 iOS' : `🔀 Mix (${androidPercent}% Android, ${iosPercent}% iOS)`}
               </span>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -177,6 +179,56 @@ export default function UserAgentGenerator() {
                 🔀 Mix
               </Button>
             </div>
+
+            {/* Mix Percentage Control */}
+            {device === 'mix' && (
+              <div className="mt-4 p-4 bg-slate-700/30 rounded-lg border border-slate-600">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-slate-200">Mix Ratio</h4>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="bg-green-900/50 text-green-400 px-2 py-1 rounded">📱 {androidPercent}%</span>
+                    <span className="bg-blue-900/50 text-blue-400 px-2 py-1 rounded">🍎 {iosPercent}%</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={androidPercent}
+                    onChange={(e) => setAndroidPercent(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-xs text-slate-400">
+                    <span>100% iOS</span>
+                    <span>50/50</span>
+                    <span>100% Android</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-2 mt-3">
+                  {[
+                    { android: 80, label: '80/20' },
+                    { android: 60, label: '60/40' },
+                    { android: 50, label: '50/50' },
+                    { android: 40, label: '40/60' },
+                    { android: 20, label: '20/80' },
+                  ].map((preset) => (
+                    <button
+                      key={preset.android}
+                      onClick={() => setAndroidPercent(preset.android)}
+                      className={`px-2 py-1.5 text-xs rounded transition-all ${
+                        androidPercent === preset.android
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-slate-600/50 text-slate-300 hover:bg-slate-600'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Browser Selection */}
