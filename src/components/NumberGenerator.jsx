@@ -4,7 +4,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Car
 import { Button } from './Button';
 import { Select } from './Select';
 import { generatePhoneNumbers, getAreaCodesForCountry } from '../utils/numberGenerator';
-import { useStats } from '../context/StatsContext';
 
 export default function NumberGenerator() {
   const [country, setCountry] = useState('usa');
@@ -16,13 +15,10 @@ export default function NumberGenerator() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [results, setResults] = useState([]);
   const [copied, setCopied] = useState(false);
-  const { recordGeneration } = useStats();
 
   const handleGenerate = () => {
     const generated = generatePhoneNumbers(country, numberType, format, count, areaCode);
     setResults(generated);
-    // Record statistics
-    recordGeneration('numbergenerator', count);
   };
 
   const handleCountryChange = (newCountry) => {

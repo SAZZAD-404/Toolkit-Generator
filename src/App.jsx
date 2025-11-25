@@ -7,8 +7,6 @@ import IpFinder from './components/IpFinder';
 import NumberGenerator from './components/NumberGenerator';
 import Footer from './components/Footer';
 import { ToastProvider } from './context/ToastContext';
-import { StatsProvider } from './context/StatsContext';
-import { TemplateProvider } from './context/TemplateContext';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('gmail');
@@ -79,11 +77,7 @@ function AppContent() {
 function App() {
   return (
     <ToastProvider>
-      <StatsProvider>
-        <TemplateProvider>
-          <AppContent />
-        </TemplateProvider>
-      </StatsProvider>
+      <AppContent />
     </ToastProvider>
   );
 }

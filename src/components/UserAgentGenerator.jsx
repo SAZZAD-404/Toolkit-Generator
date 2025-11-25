@@ -5,7 +5,6 @@ import { Button } from './Button';
 import { Select } from './Select';
 import { generateUserAgents } from '../utils/userAgentGenerator';
 import { useToast } from '../context/ToastContext';
-import { useStats } from '../context/StatsContext';
 
 export default function UserAgentGenerator() {
   const [device, setDevice] = useState('android');
@@ -19,7 +18,6 @@ export default function UserAgentGenerator() {
   const [androidPercent, setAndroidPercent] = useState(60);
   const iosPercent = 100 - androidPercent;
   const { addToast } = useToast();
-  const { recordGeneration } = useStats();
 
   const handleGenerate = () => {
     if (device === 'mix') {
@@ -63,8 +61,6 @@ export default function UserAgentGenerator() {
       setResults(generated);
       setResultDevices(Array(count).fill(device));
     }
-    // Record statistics
-    recordGeneration('useragent', count);
     addToast(`${count} user agents generated!`, 'success');
   };
 

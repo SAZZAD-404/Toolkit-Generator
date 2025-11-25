@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Copy, Globe, RefreshCw, Search, MapPin } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Card';
 import { Button } from './Button';
-import { useStats } from '../context/StatsContext';
 
 export default function IpFinder() {
   const [myIp, setMyIp] = useState('Loading...');
@@ -13,7 +12,6 @@ export default function IpFinder() {
   const [addressLoading, setAddressLoading] = useState(false);
   const [addressData, setAddressData] = useState(null);
   const [addressError, setAddressError] = useState('');
-  const { recordGeneration } = useStats();
 
   useEffect(() => {
     fetchMyIp();
@@ -74,8 +72,6 @@ export default function IpFinder() {
           as: data.asn
         };
         setAddressData(mappedData);
-        // Record statistics for successful IP lookup
-        recordGeneration('ipfinder', 1);
       }
     } catch (error) {
       setAddressError('Network error. Please try again.');
