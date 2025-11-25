@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Copy } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Card';
 import { Button } from './Button';
 import { Select } from './Select';
-import { generateGmailUsernames, checkEmailAvailability } from '../utils/gmailGenerator';
+import { generateGmailUsernames } from '../utils/gmailGenerator';
+import { useToast } from '../context/ToastContext';
 
 export default function GmailGenerator() {
   const [gender, setGender] = useState('both');
@@ -11,34 +12,38 @@ export default function GmailGenerator() {
   const [style, setStyle] = useState('standard');
   const [country, setCountry] = useState('usa');
   const [results, setResults] = useState([]);
-  const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { addToast } = useToast();
 
   const handleGenerate = () => {
-    const generated = generateGmailUsernames(gender, country, style, count);
-    setResults(generated);
+    setIsLoading(true);
+    setTimeout(() => {
+      const generated = generateGmailUsernames(gender, country, style, count);
+      setResults(generated);
+      setIsLoading(false);
+      addToast(`${count} emails generated successfully!`, 'success');
+    }, 300);
   };
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    addToast('Copied to clipboard!', 'success');
   };
 
   const handleCopyAll = () => {
     const allEmails = results.map(r => r.email).join('\n');
     navigator.clipboard.writeText(allEmails);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    addToast(`${results.length} emails copied!`, 'success');
   };
 
   const handleCopyName = (name) => {
     navigator.clipboard.writeText(name);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    addToast('Name copied!', 'success');
   };
 
   const handleClear = () => {
     setResults([]);
+    addToast('Results cleared', 'info');
   };
 
   return (

@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Car
 import { Button } from './Button';
 import { Select } from './Select';
 import { generateUserAgents } from '../utils/userAgentGenerator';
+import { useToast } from '../context/ToastContext';
 
 export default function UserAgentGenerator() {
   const [device, setDevice] = useState('android');
@@ -12,76 +13,77 @@ export default function UserAgentGenerator() {
   const [count, setCount] = useState(5);
   const [results, setResults] = useState([]);
   const [resultDevices, setResultDevices] = useState([]);
-  const [copied, setCopied] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [androidPercent, setAndroidPercent] = useState(60);
+  const [isLoading, setIsLoading] = useState(false);
   const iosPercent = 100 - androidPercent;
+  const { addToast } = useToast();
 
   const handleGenerate = () => {
-    if (device === 'mix') {
-      // Generate based on user-defined percentages
-      const androidCount = Math.round(count * (androidPercent / 100));
-      const iosCount = count - androidCount;
+    setIsLoading(true);
+    setTimeout(() => {
+      if (device === 'mix') {
+        const androidCount = Math.round(count * (androidPercent / 100));
+        const iosCount = count - androidCount;
 
-      // Handle version mix
-      let androidUAs, iosUAs;
-      if (version === 'mix') {
-        // Generate mixed versions for Android
-        androidUAs = [];
-        for (let i = 0; i < androidCount; i++) {
-          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-          androidUAs.push(...generateUserAgents('android', browser, randomVersion, 1));
+        let androidUAs, iosUAs;
+        if (version === 'mix') {
+          androidUAs = [];
+          for (let i = 0; i < androidCount; i++) {
+            const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+            androidUAs.push(...generateUserAgents('android', browser, randomVersion, 1));
+          }
+          iosUAs = [];
+          for (let i = 0; i < iosCount; i++) {
+            const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+            iosUAs.push(...generateUserAgents('iphone', browser, randomVersion, 1));
+          }
+        } else {
+          androidUAs = generateUserAgents('android', browser, version, androidCount);
+          iosUAs = generateUserAgents('iphone', browser, version, iosCount);
         }
-        // Generate mixed versions for iOS
-        iosUAs = [];
-        for (let i = 0; i < iosCount; i++) {
-          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-          iosUAs.push(...generateUserAgents('iphone', browser, randomVersion, 1));
-        }
+
+        const combined = [...androidUAs.map((ua) => ({ ua, device: 'android' })),
+        ...iosUAs.map((ua) => ({ ua, device: 'iphone' }))];
+        const shuffled = combined.sort(() => Math.random() - 0.5);
+
+        setResults(shuffled.map(item => item.ua));
+        setResultDevices(shuffled.map(item => item.device));
       } else {
-        androidUAs = generateUserAgents('android', browser, version, androidCount);
-        iosUAs = generateUserAgents('iphone', browser, version, iosCount);
-      }
-
-      // Mix them together randomly with same order
-      const combined = [...androidUAs.map((ua) => ({ ua, device: 'android' })),
-      ...iosUAs.map((ua) => ({ ua, device: 'iphone' }))];
-      const shuffled = combined.sort(() => Math.random() - 0.5);
-
-      setResults(shuffled.map(item => item.ua));
-      setResultDevices(shuffled.map(item => item.device));
-    } else {
-      // Handle version mix for single device
-      let generated;
-      if (version === 'mix') {
-        generated = [];
-        for (let i = 0; i < count; i++) {
-          const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-          generated.push(...generateUserAgents(device, browser, randomVersion, 1));
+        let generated;
+        if (version === 'mix') {
+          generated = [];
+          for (let i = 0; i < count; i++) {
+            const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
+            generated.push(...generateUserAgents(device, browser, randomVersion, 1));
+          }
+        } else {
+          generated = generateUserAgents(device, browser, version, count);
         }
-      } else {
-        generated = generateUserAgents(device, browser, version, count);
+        setResults(generated);
+        setResultDevices(Array(count).fill(device));
       }
-      setResults(generated);
-      setResultDevices(Array(count).fill(device));
-    }
+      setIsLoading(false);
+      addToast(`${count} user agents generated!`, 'success');
+    }, 300);
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(results.join('\n'));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    addToast(`${results.length} user agents copied!`, 'success');
   };
 
   const handleCopyIndividual = (ua, index) => {
     navigator.clipboard.writeText(ua);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
+    addToast('User agent copied!', 'success');
   };
 
   const handleClear = () => {
     setResults([]);
     setResultDevices([]);
+    addToast('Results cleared', 'info');
   };
 
   const handleExport = (format) => {
