@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Mail, Smartphone, Globe, Hash, BarChart3 } from 'lucide-react';
+import { Mail, Smartphone, Globe, Hash } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/Tabs';
 import GmailGenerator from './components/GmailGenerator';
 import UserAgentGenerator from './components/UserAgentGenerator';
 import IpFinder from './components/IpFinder';
 import NumberGenerator from './components/NumberGenerator';
-import StatsDashboard from './components/StatsDashboard';
 import Footer from './components/Footer';
 import { ToastProvider } from './context/ToastContext';
 import { StatsProvider } from './context/StatsContext';
@@ -31,7 +30,7 @@ function AppContent() {
 
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 mb-6 md:mb-8 p-1 bg-slate-800 shadow-lg shadow-black/30 border border-slate-700">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6 md:mb-8 p-1 bg-slate-800 shadow-lg shadow-black/30 border border-slate-700">
             <TabsTrigger value="gmail" className="flex items-center justify-center gap-2">
               <Mail size={18} />
               <span className="hidden sm:inline">Gmail Generator</span>
@@ -52,11 +51,6 @@ function AppContent() {
               <span className="hidden sm:inline">Number Generator</span>
               <span className="sm:hidden">Number</span>
             </TabsTrigger>
-            <TabsTrigger value="stats" className="flex items-center justify-center gap-2">
-              <BarChart3 size={18} />
-              <span className="hidden sm:inline">Statistics</span>
-              <span className="sm:hidden">Stats</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="gmail" className="mt-0">
@@ -73,10 +67,6 @@ function AppContent() {
 
           <TabsContent value="numbergenerator" className="mt-0">
             <NumberGenerator />
-          </TabsContent>
-
-          <TabsContent value="stats" className="mt-0">
-            <StatsDashboard />
           </TabsContent>
         </Tabs>
       </main>
