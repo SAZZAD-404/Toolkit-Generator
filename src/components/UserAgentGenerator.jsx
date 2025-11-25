@@ -184,9 +184,10 @@ export default function UserAgentGenerator() {
             {device === 'mix' && (
               <div className="mt-4 p-4 bg-slate-700/30 rounded-lg border border-slate-600">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-slate-200">Mix Ratio</h4>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="bg-green-900/50 text-green-400 px-2 py-1 rounded">📱 {androidPercent}%</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
                     <span className="bg-blue-900/50 text-blue-400 px-2 py-1 rounded">🍎 {iosPercent}%</span>
                   </div>
                 </div>
@@ -200,32 +201,6 @@ export default function UserAgentGenerator() {
                     onChange={(e) => setAndroidPercent(parseInt(e.target.value))}
                     className="w-full h-2 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg appearance-none cursor-pointer"
                   />
-                  <div className="flex justify-between text-xs text-slate-400">
-                    <span>100% iOS</span>
-                    <span>50/50</span>
-                    <span>100% Android</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-5 gap-2 mt-3">
-                  {[
-                    { android: 80, label: '80/20' },
-                    { android: 60, label: '60/40' },
-                    { android: 50, label: '50/50' },
-                    { android: 40, label: '40/60' },
-                    { android: 20, label: '20/80' },
-                  ].map((preset) => (
-                    <button
-                      key={preset.android}
-                      onClick={() => setAndroidPercent(preset.android)}
-                      className={`px-2 py-1.5 text-xs rounded transition-all ${
-                        androidPercent === preset.android
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-600/50 text-slate-300 hover:bg-slate-600'
-                      }`}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
                 </div>
               </div>
             )}
