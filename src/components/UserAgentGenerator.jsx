@@ -5,7 +5,6 @@ import { Button } from './Button';
 import { Select } from './Select';
 import { generateUserAgents, availableCountries } from '../utils/userAgentGenerator';
 import { saveGeneratedData, getExistingDataValues } from '../utils/dataStorage';
-import { useAuth } from '../context/AuthContext';
 import { useAppData } from '../context/AppDataContext';
 import { useToast } from '../context/ToastContext';
 import DuplicateStatus from './DuplicateStatus';
@@ -23,7 +22,6 @@ export default function UserAgentGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [androidPercent, setAndroidPercent] = useState(60);
   const iosPercent = 100 - androidPercent;
-  const { user } = useAuth();
   const { addGeneratedData } = useAppData();
   const { addToast } = useToast();
 

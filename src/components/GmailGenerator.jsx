@@ -3,7 +3,6 @@ import { Copy } from 'lucide-react';
 import { Card, CardContent } from './Card';
 import { generateGmailUsernames } from '../utils/gmailGenerator';
 import { saveEmailHistory, getExistingDataValues } from '../utils/dataStorage';
-import { useAuth } from '../context/AuthContext';
 import { useAppData } from '../context/AppDataContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from './ui/Button';
@@ -17,7 +16,6 @@ export default function GmailGenerator() {
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { user } = useAuth();
   const { addGeneratedData } = useAppData();
   const { toast } = useToast();
 

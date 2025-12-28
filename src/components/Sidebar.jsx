@@ -3,15 +3,9 @@ import {
   ChevronLeft, ChevronRight, Zap, LogOut
 } from 'lucide-react';
 import { useAppData } from '../context/AppDataContext';
-import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
   const { generatedDataCount, getDataCountByType } = useAppData();
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   const dashboardItem = {
     id: 'dashboard',
