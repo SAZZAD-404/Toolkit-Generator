@@ -6,8 +6,8 @@ export default function AccountSettings() {
   const { generatedDataCount } = useAppData()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    displayName: user?.email?.split('@')[0] || '',
-    email: user?.email || ''
+    displayName: 'Toolkit User',
+    email: 'user@toolkit-generator.com'
   })
 
   const handleSave = () => {
@@ -17,11 +17,11 @@ export default function AccountSettings() {
   }
 
   const getInitials = (email) => {
-    return email?.split('@')[0]?.slice(0, 2)?.toUpperCase() || 'U'
+    return email?.split('@')[0]?.slice(0, 2)?.toUpperCase() || 'TU'
   }
 
   const getMemberSince = (createdAt) => {
-    return new Date(createdAt).toLocaleDateString('en-US', { 
+    return new Date().toLocaleDateString('en-US', { 
       month: 'long', 
       day: 'numeric',
       year: 'numeric' 
@@ -38,7 +38,7 @@ export default function AccountSettings() {
               <div className="flex items-center gap-6">
                 <div className="relative">
                   <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-2xl shadow-indigo-500/25">
-                    {getInitials(user?.email)}
+                    {getInitials(formData.email)}
                   </div>
                   <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 border-3 border-slate-800 rounded-full animate-pulse shadow-lg"></div>
                 </div>
@@ -110,7 +110,7 @@ export default function AccountSettings() {
                     </label>
                     <div className="px-6 py-4 bg-slate-900/50 border border-slate-600/30 rounded-xl text-slate-300 text-lg flex items-center gap-4">
                       <Mail size={20} className="text-slate-400" />
-                      <span className="flex-1">{user?.email}</span>
+                      <span className="flex-1">{formData.email}</span>
                       <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm font-semibold rounded-full border border-green-500/30">
                         Verified
                       </span>
@@ -125,7 +125,7 @@ export default function AccountSettings() {
                     </label>
                     <div className="px-6 py-4 bg-slate-900/50 border border-slate-600/30 rounded-xl text-slate-300 text-lg flex items-center gap-4">
                       <Calendar size={20} className="text-slate-400" />
-                      <span>{getMemberSince(user?.created_at)}</span>
+                      <span>{getMemberSince()}</span>
                     </div>
                   </div>
 

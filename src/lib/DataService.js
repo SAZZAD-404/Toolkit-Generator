@@ -13,17 +13,10 @@ class DataService {
    * @param {string} dataValue - The generated value
    * @param {object} metadata - Additional information (optional)
    * @returns {Promise<object>} - Saved data record
-   * @throws {Error} - If user is not authenticated or database operation fails
+   * @throws {Error} - If database operation fails
    */
   async saveGeneratedData(dataType, dataValue, metadata = {}) {
     try {
-      // Verify user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
-        throw new Error('User must be authenticated to save data');
-      }
-
       // Validate required parameters
       if (!dataType || typeof dataType !== 'string') {
         throw new Error('dataType is required and must be a string');
@@ -39,7 +32,7 @@ class DataService {
         throw new Error(`dataType must be one of: ${validTypes.join(', ')}`);
       }
 
-      // Insert data - user_id is automatically set by RLS
+      // Insert data
       const { data, error } = await supabase
         .from('generated_data')
         .insert({
@@ -67,21 +60,14 @@ class DataService {
   }
 
   /**
-   * Get user's generated data by type
+   * Get generated data by type
    * @param {string} dataType - Type of data to retrieve (optional, returns all if not specified)
    * @param {number} limit - Maximum number of records (default: 100)
    * @returns {Promise<Array>} - Array of data records ordered by creation time (newest first)
-   * @throws {Error} - If user is not authenticated or database operation fails
+   * @throws {Error} - If database operation fails
    */
   async getUserData(dataType = null, limit = 100) {
     try {
-      // Verify user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
-        throw new Error('User must be authenticated to retrieve data');
-      }
-
       // Validate limit
       if (typeof limit !== 'number' || limit < 1) {
         throw new Error('limit must be a positive number');
@@ -116,22 +102,15 @@ class DataService {
   }
 
   /**
-   * Get statistics for user's generated data
+   * Get statistics for generated data
    * @param {object} options - Optional filtering options
    * @param {Date} options.startDate - Start date for filtering (optional)
    * @param {Date} options.endDate - End date for filtering (optional)
    * @returns {Promise<object>} - Statistics object with counts per type
-   * @throws {Error} - If user is not authenticated or database operation fails
+   * @throws {Error} - If database operation fails
    */
   async getUserStatistics(options = {}) {
     try {
-      // Verify user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
-        throw new Error('User must be authenticated to retrieve statistics');
-      }
-
       // Build query
       let query = supabase
         .from('generated_data')
@@ -182,17 +161,10 @@ class DataService {
    * Delete a data record
    * @param {string} id - Record ID to delete
    * @returns {Promise<void>}
-   * @throws {Error} - If user is not authenticated or database operation fails
+   * @throws {Error} - If database operation fails
    */
   async deleteData(id) {
     try {
-      // Verify user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
-        throw new Error('User must be authenticated to delete data');
-      }
-
       // Validate id
       if (!id || typeof id !== 'string') {
         throw new Error('id is required and must be a string');
