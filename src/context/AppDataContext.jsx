@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { useAuth } from './AuthContext'
 
 const AppDataContext = createContext({})
 
@@ -26,6 +27,7 @@ export const AppDataProvider = ({ children }) => {
     }
   ])
   const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const { user } = useAuth()
 
   // Track online/offline status
   useEffect(() => {

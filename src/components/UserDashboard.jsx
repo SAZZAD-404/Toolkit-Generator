@@ -16,6 +16,7 @@ import {
   Filler
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
+import { useAuth } from '../context/AuthContext';
 import { useAppData } from '../context/AppDataContext';
 import { SkeletonStats, SkeletonCard } from './ui/SkeletonLoader';
 import { useToast } from '../context/ToastContext';
@@ -47,6 +48,7 @@ export default function UserDashboard() {
     serverLoad: Math.floor(Math.random() * 20 + 15)
   }), [lastUpdate]);
 
+  const { user } = useAuth();
   const { getDataCountByType, generatedDataCount, recentActivity } = useAppData();
   const { addToast } = useToast();
 

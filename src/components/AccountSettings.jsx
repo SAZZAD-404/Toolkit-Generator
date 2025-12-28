@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { User, Mail, Calendar, Database, Save, Edit3 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { useAppData } from '../context/AppDataContext'
 
 export default function AccountSettings() {
+  const { user } = useAuth()
   const { generatedDataCount } = useAppData()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({

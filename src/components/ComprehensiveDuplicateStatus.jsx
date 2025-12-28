@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, CheckCircle, AlertTriangle, Database, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from './Card';
+import { useAuth } from '../context/AuthContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function ComprehensiveDuplicateStatus() {
@@ -12,6 +13,7 @@ export default function ComprehensiveDuplicateStatus() {
   });
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const { user } = useAuth();
 
   const fetchStats = async () => {
     if (!isSupabaseConfigured || !user) {
