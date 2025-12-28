@@ -1,0 +1,111 @@
+/* Performance Optimizations */
+
+/* Reduce paint and layout thrashing */
+* {
+  box-sizing: border-box;
+}
+
+/* Optimize animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* GPU acceleration for smooth animations */
+.animate-spin,
+.animate-pulse,
+.animate-bounce,
+.animate-fadeIn {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Optimize backdrop blur */
+.backdrop-blur-xl,
+.backdrop-blur-sm {
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  will-change: backdrop-filter;
+}
+
+/* Optimize gradients */
+.bg-gradient-to-r,
+.bg-gradient-to-br,
+.bg-gradient-to-b {
+  will-change: background;
+}
+
+/* Smooth scrolling optimization */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Optimize hover effects */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+  will-change: transform;
+}
+
+/* Reduce repaints on text */
+.font-mono {
+  font-feature-settings: "tnum";
+}
+
+/* Optimize shadows */
+.shadow-2xl,
+.shadow-xl,
+.shadow-lg {
+  will-change: box-shadow;
+}
+
+/* Custom animations with better performance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Optimize loading states */
+.loading-skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Optimize chart containers */
+.chart-container {
+  contain: layout style paint;
+}
+
+/* Reduce layout shifts */
+.aspect-ratio-16-9 {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-ratio-1-1 {
+  aspect-ratio: 1 / 1;
+}
