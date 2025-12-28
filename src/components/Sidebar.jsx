@@ -1,17 +1,11 @@
 import { 
   Mail, Smartphone, Globe, Hash, User, Database, 
-  ChevronLeft, ChevronRight, Zap, LogOut
+  ChevronLeft, ChevronRight, Zap
 } from 'lucide-react';
 import { useAppData } from '../context/AppDataContext';
-import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
   const { generatedDataCount, getDataCountByType } = useAppData();
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   const dashboardItem = {
     id: 'dashboard',
@@ -194,77 +188,6 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, setCollaps
           
           {!collapsed && (
             <div className="relative z-10 space-y-4">
-              {/* Professional User Session Card */}
-              {user && (
-                <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/60 backdrop-blur-2xl border border-slate-600/40 hover:border-slate-500/60 p-4 shadow-2xl hover:shadow-slate-900/50 transition-all duration-500">
-                  {/* Premium Glass Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-black/[0.02]"></div>
-                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-400/20 to-transparent"></div>
-                  
-                  <div className="relative z-10 flex items-center justify-between">
-                    {/* Professional Avatar Section */}
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => setActiveTab('settings')}
-                        className="group/avatar relative hover:scale-105 transition-all duration-300"
-                        title="Account Settings"
-                      >
-                        {/* Premium Avatar with Multiple Rings */}
-                        <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-600 to-violet-700 p-0.5 shadow-2xl shadow-indigo-500/25 group-hover/avatar:shadow-indigo-500/40 transition-all duration-300">
-                          <div className="w-full h-full rounded-[14px] bg-gradient-to-br from-indigo-400 via-purple-500 to-violet-600 flex items-center justify-center group-hover/avatar:from-indigo-300 group-hover/avatar:via-purple-400 group-hover/avatar:to-violet-500 transition-all duration-300">
-                            <span className="text-white font-bold text-sm tracking-wide">
-                              {user.email?.split('@')[0]?.slice(0, 2)?.toUpperCase() || 'U'}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {/* Premium Status Indicator */}
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 border-2 border-slate-900 shadow-lg">
-                          <div className="absolute inset-0.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                        </div>
-
-                        {/* Hover Ring Effect */}
-                        <div className="absolute inset-0 rounded-2xl ring-2 ring-indigo-400/0 group-hover/avatar:ring-indigo-400/30 transition-all duration-300"></div>
-                      </button>
-                      
-                      {/* Professional Stats */}
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                            <span className="text-xs font-semibold text-slate-300 tracking-wide">
-                              {generatedDataCount.toLocaleString()} ITEMS
-                            </span>
-                          </div>
-                          <div className="w-px h-3 bg-slate-600"></div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                            <span className="text-xs font-semibold text-emerald-400 tracking-wide">
-                              ACTIVE
-                            </span>
-                          </div>
-                        </div>
-                        <div className="text-xs text-slate-500 font-medium">
-                          Session • {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Premium Logout Button */}
-                    <button
-                      onClick={handleSignOut}
-                      className="group/logout relative overflow-hidden p-2.5 rounded-xl bg-gradient-to-br from-red-500/10 via-red-600/10 to-red-700/10 hover:from-red-500/20 hover:via-red-600/20 hover:to-red-700/20 border border-red-500/30 hover:border-red-400/60 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
-                      title="End Session"
-                    >
-                      {/* Animated Background Shine */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/10 to-transparent -translate-x-full group-hover/logout:translate-x-full transition-transform duration-700"></div>
-                      
-                      <LogOut className="relative z-10 w-4 h-4 text-red-400 group-hover/logout:text-red-300 transition-all duration-300 group-hover/logout:rotate-12" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {/* Professional Branding */}
               <div className="text-center space-y-2">
                 <div className="flex items-center justify-center gap-2">
@@ -295,55 +218,6 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, setCollaps
           {/* Collapsed State - Ultra Professional */}
           {collapsed && (
             <div className="relative z-10 flex flex-col items-center space-y-4">
-              {/* Premium Avatar - Collapsed */}
-              {user && (
-                <button
-                  onClick={() => setActiveTab('settings')}
-                  className="group relative hover:scale-110 transition-all duration-300"
-                  title="Account Settings"
-                >
-                  <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-violet-700 p-0.5 shadow-xl shadow-indigo-500/30 group-hover:shadow-indigo-500/50 transition-all duration-300">
-                    <div className="w-full h-full rounded-lg bg-gradient-to-br from-indigo-400 via-purple-500 to-violet-600 flex items-center justify-center group-hover:from-indigo-300 group-hover:via-purple-400 group-hover:to-violet-500 transition-all duration-300">
-                      <span className="text-white font-bold text-sm">
-                        {user.email?.split('@')[0]?.slice(0, 2)?.toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-900 animate-pulse"></div>
-                  
-                  {/* Hover Ring Effect */}
-                  <div className="absolute inset-0 rounded-xl ring-2 ring-indigo-400/0 group-hover:ring-indigo-400/40 transition-all duration-300"></div>
-                  
-                  {/* Premium Tooltip */}
-                  <div className="absolute left-full ml-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50">
-                    <div className="bg-slate-800/95 backdrop-blur-xl text-white text-xs rounded-xl px-3 py-2 border border-slate-600/50 shadow-2xl">
-                      <div className="font-semibold">Account Settings</div>
-                      <div className="text-slate-400">{generatedDataCount} Items • Active</div>
-                      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-slate-800 border-l border-b border-slate-600/50 rotate-45"></div>
-                    </div>
-                  </div>
-                </button>
-              )}
-
-              {/* Premium Logout - Collapsed */}
-              <button
-                onClick={handleSignOut}
-                className="group relative p-2.5 rounded-xl bg-gradient-to-br from-red-500/10 to-red-600/10 hover:from-red-500/20 hover:to-red-600/20 border border-red-500/30 hover:border-red-400/60 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/25"
-                title="End Session"
-              >
-                <LogOut className="w-4 h-4 text-red-400 group-hover:text-red-300 transition-all duration-300 group-hover:rotate-12" />
-                
-                {/* Premium Tooltip */}
-                <div className="absolute left-full ml-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50">
-                  <div className="bg-slate-800/95 backdrop-blur-xl text-white text-xs rounded-xl px-3 py-2 border border-slate-600/50 shadow-2xl whitespace-nowrap">
-                    <div className="font-semibold text-red-300">End Session</div>
-                    <div className="text-slate-400">Sign out securely</div>
-                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-slate-800 border-l border-b border-slate-600/50 rotate-45"></div>
-                  </div>
-                </div>
-              </button>
-
               {/* Minimal Branding */}
               <div className="w-px h-4 bg-gradient-to-b from-slate-600 to-transparent"></div>
             </div>

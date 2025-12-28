@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Copy, Globe, RefreshCw, Search, MapPin } from 'lucide-react';
 import { Card, CardContent } from './Card';
 import { saveGeneratedData, checkDataExists } from '../utils/dataStorage';
-import { useAuth } from '../context/AuthContext';
 import { useAppData } from '../context/AppDataContext';
 import { useToast } from '../context/ToastContext';
 import DuplicateStatus from './DuplicateStatus';
@@ -17,7 +16,6 @@ export default function IpFinder() {
   const [addressData, setAddressData] = useState(null);
   const [addressError, setAddressError] = useState('');
 
-  const { user } = useAuth();
   const { addGeneratedData } = useAppData();
   const { addToast } = useToast();
 

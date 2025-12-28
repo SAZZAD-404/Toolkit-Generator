@@ -3,10 +3,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import DashboardLayout from './components/DashboardLayout';
 import Footer from './components/Footer';
-import LandingPage from './components/LandingPage';
-import AuthCallback from './components/AuthCallback';
 import { ToastProvider } from './context/ToastContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppDataProvider } from './context/AppDataContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -16,14 +13,12 @@ const UserAgentGenerator = lazy(() => import('./components/UserAgentGenerator'))
 const IpFinder = lazy(() => import('./components/IpFinder'));
 const NumberGenerator = lazy(() => import('./components/NumberGenerator'));
 const UserDashboard = lazy(() => import('./components/UserDashboard'));
-const AccountSettings = lazy(() => import('./components/AccountSettings'));
 const AllDataPage = lazy(() => import('./components/AllDataPage'));
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { user, loading } = useAuth();
 
   // Check if mobile
   useEffect(() => {
@@ -39,7 +34,7 @@ function AppContent() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Listen for navigation events from UserMenu
+  // Listen for navigation events
   useEffect(() => {
     const handleNavigateToTab = (event) => {
       setActiveTab(event.detail);
@@ -48,27 +43,6 @@ function AppContent() {
     window.addEventListener('navigate-to-tab', handleNavigateToTab);
     return () => window.removeEventListener('navigate-to-tab', handleNavigateToTab);
   }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-theme-primary flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-theme-primary font-medium">Loading CPA Toolkit...</div>
-          <div className="text-theme-secondary text-sm mt-2">Preparing your workspace</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show landing page if user is not authenticated
-  if (!user) {
-    // Check if this is an auth callback
-    if (window.location.pathname === '/auth/callback' || window.location.hash.includes('access_token')) {
-      return <AuthCallback />;
-    }
-    return <LandingPage />;
-  }
 
   const renderContent = () => {
     const LoadingFallback = () => (
@@ -117,12 +91,6 @@ function AppContent() {
             <AllDataPage />
           </Suspense>
         );
-      case 'settings':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <AccountSettings />
-          </Suspense>
-        );
       default:
         return (
           <Suspense fallback={<LoadingFallback />}>
@@ -132,7 +100,7 @@ function AppContent() {
     }
   };
 
-  // Show main application for authenticated users
+  // Show main application directly (no authentication required)
   return (
     <div className="min-h-screen bg-theme-primary">
       {/* Mobile Header */}
@@ -182,13 +150,11 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <AppDataProvider>
-          <ToastProvider>
-            <AppContent />
-          </ToastProvider>
-        </AppDataProvider>
-      </AuthProvider>
+      <AppDataProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </AppDataProvider>
     </ThemeProvider>
   );
 }
