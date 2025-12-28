@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Mail, Smartphone, Globe, Hash, Calendar, Search, Filter, Download, Eye, Copy } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 import { useAppData } from '../context/AppDataContext'
 import { useToast } from '../context/ToastContext'
 
@@ -12,6 +13,7 @@ export default function AllDataPage() {
   const [sortBy, setSortBy] = useState('created_at')
   const [sortOrder, setSortOrder] = useState('desc')
   const [selectedItems, setSelectedItems] = useState([])
+  const { user } = useAuth()
   const { fetchDataCount, getTimeAgo } = useAppData()
   const { addToast } = useToast()
 

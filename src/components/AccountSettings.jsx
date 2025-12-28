@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { User, Mail, Calendar, Database, Save, Edit3 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { useAppData } from '../context/AppDataContext'
 
 export default function AccountSettings() {
+  const { user, userProfile } = useAuth()
   const { generatedDataCount } = useAppData()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    displayName: 'Toolkit User',
-    email: 'user@toolkit-generator.com'
+    displayName: userProfile?.name || user?.email?.split('@')[0] || '',
+    email: user?.email || ''
   })
 
   const handleSave = () => {
@@ -17,11 +19,15 @@ export default function AccountSettings() {
   }
 
   const getInitials = (email) => {
+    if (userProfile?.name) {
+      return userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    }
     return email?.split('@')[0]?.slice(0, 2)?.toUpperCase() || 'TU'
   }
 
   const getMemberSince = (createdAt) => {
-    return new Date().toLocaleDateString('en-US', { 
+    const date = createdAt ? new Date(createdAt) : new Date()
+    return date.toLocaleDateString('en-US', { 
       month: 'long', 
       day: 'numeric',
       year: 'numeric' 
@@ -38,7 +44,7 @@ export default function AccountSettings() {
               <div className="flex items-center gap-6">
                 <div className="relative">
                   <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-2xl shadow-indigo-500/25">
-                    {getInitials(formData.email)}
+                    {getInitials(user?.email)}
                   </div>
                   <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 border-3 border-slate-800 rounded-full animate-pulse shadow-lg"></div>
                 </div>
@@ -110,7 +116,7 @@ export default function AccountSettings() {
                     </label>
                     <div className="px-6 py-4 bg-slate-900/50 border border-slate-600/30 rounded-xl text-slate-300 text-lg flex items-center gap-4">
                       <Mail size={20} className="text-slate-400" />
-                      <span className="flex-1">{formData.email}</span>
+                      <span className="flex-1">{user?.email}</span>
                       <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm font-semibold rounded-full border border-green-500/30">
                         Verified
                       </span>
@@ -125,7 +131,7 @@ export default function AccountSettings() {
                     </label>
                     <div className="px-6 py-4 bg-slate-900/50 border border-slate-600/30 rounded-xl text-slate-300 text-lg flex items-center gap-4">
                       <Calendar size={20} className="text-slate-400" />
-                      <span>{getMemberSince()}</span>
+                      <span>{getMemberSince(user?.created_at)}</span>
                     </div>
                   </div>
 

@@ -13,10 +13,17 @@ class DataService {
    * @param {string} dataValue - The generated value
    * @param {object} metadata - Additional information (optional)
    * @returns {Promise<object>} - Saved data record
-   * @throws {Error} - If database operation fails
+   * @throws {Error} - If user is not authenticated or database operation fails
    */
   async saveGeneratedData(dataType, dataValue, metadata = {}) {
     try {
+      // Verify user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('User must be authenticated to save data');
+      }
+
       // Validate required parameters
       if (!dataType || typeof dataType !== 'string') {
         throw new Error('dataType is required and must be a string');
@@ -32,17 +39,18 @@ class DataService {
         throw new Error(`dataType must be one of: ${validTypes.join(', ')}`);
       }
 
-      // Insert data
+      // Insert data with user_id
       const { data, error } = await supabase
         .from('generated_data')
         .insert({
+          user_id: user.id,
           data_type: dataType,
           data_value: dataValue,
           metadata: metadata
         })
         .select()
         .single();
-      
+
       if (error) {
         console.error('Database error saving data:', error);
         throw new Error(`Failed to save data: ${error.message}`);
@@ -60,23 +68,31 @@ class DataService {
   }
 
   /**
-   * Get generated data by type
+   * Get user's generated data by type
    * @param {string} dataType - Type of data to retrieve (optional, returns all if not specified)
    * @param {number} limit - Maximum number of records (default: 100)
    * @returns {Promise<Array>} - Array of data records ordered by creation time (newest first)
-   * @throws {Error} - If database operation fails
+   * @throws {Error} - If user is not authenticated or database operation fails
    */
   async getUserData(dataType = null, limit = 100) {
     try {
+      // Verify user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('User must be authenticated to retrieve data');
+      }
+
       // Validate limit
       if (typeof limit !== 'number' || limit < 1) {
         throw new Error('limit must be a positive number');
       }
 
-      // Build query
+      // Build query with user_id filter
       let query = supabase
         .from('generated_data')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -102,19 +118,27 @@ class DataService {
   }
 
   /**
-   * Get statistics for generated data
+   * Get statistics for user's generated data
    * @param {object} options - Optional filtering options
    * @param {Date} options.startDate - Start date for filtering (optional)
    * @param {Date} options.endDate - End date for filtering (optional)
    * @returns {Promise<object>} - Statistics object with counts per type
-   * @throws {Error} - If database operation fails
+   * @throws {Error} - If user is not authenticated or database operation fails
    */
   async getUserStatistics(options = {}) {
     try {
-      // Build query
+      // Verify user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('User must be authenticated to retrieve statistics');
+      }
+
+      // Build query with user_id filter
       let query = supabase
         .from('generated_data')
-        .select('data_type, created_at');
+        .select('data_type, created_at')
+        .eq('user_id', user.id);
 
       // Apply date filters if provided
       if (options.startDate) {
@@ -137,14 +161,15 @@ class DataService {
         phone: 0,
         user_agent: 0,
         ip: 0,
-        total: data?.length || 0
+        total: 0
       };
-      
+
       if (data) {
         data.forEach(item => {
           if (stats.hasOwnProperty(item.data_type)) {
             stats[item.data_type]++;
           }
+          stats.total++;
         });
       }
       
@@ -161,19 +186,28 @@ class DataService {
    * Delete a data record
    * @param {string} id - Record ID to delete
    * @returns {Promise<void>}
-   * @throws {Error} - If database operation fails
+   * @throws {Error} - If user is not authenticated or database operation fails
    */
   async deleteData(id) {
     try {
+      // Verify user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('User must be authenticated to delete data');
+      }
+
       // Validate id
       if (!id || typeof id !== 'string') {
         throw new Error('id is required and must be a string');
       }
 
+      // Delete with user_id check (RLS will also enforce this)
       const { error } = await supabase
         .from('generated_data')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
       
       if (error) {
         console.error('Database error deleting data:', error);
@@ -184,6 +218,40 @@ class DataService {
         throw error;
       }
       throw new Error(`Unexpected error deleting data: ${error}`);
+    }
+  }
+
+  /**
+   * Check if data already exists for the user
+   * @param {string} dataType - Type of data
+   * @param {string} dataValue - Value to check
+   * @returns {Promise<boolean>} - True if data exists
+   */
+  async checkDuplicateData(dataType, dataValue) {
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        return false;
+      }
+
+      const { data, error } = await supabase
+        .from('generated_data')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('data_type', dataType)
+        .eq('data_value', dataValue)
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking duplicate:', error);
+        return false;
+      }
+
+      return data && data.length > 0;
+    } catch (error) {
+      console.error('Error checking duplicate:', error);
+      return false;
     }
   }
 }

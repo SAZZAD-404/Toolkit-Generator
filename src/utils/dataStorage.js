@@ -7,9 +7,16 @@ export const getExistingDataValues = async (dataType, additionalFilters = {}) =>
   }
 
   try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return []
+    }
+
     let query = supabase
       .from('generated_data')
       .select('data_value, metadata')
+      .eq('user_id', user.id)
       .eq('data_type', dataType)
 
     // Apply additional filters if provided
@@ -40,6 +47,11 @@ export const checkDataExists = async (dataType, dataValue, metadata = {}) => {
   }
 
   try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return false
+    }
 
     let query = supabase
       .from('generated_data')
@@ -55,7 +67,7 @@ export const checkDataExists = async (dataType, dataValue, metadata = {}) => {
       }
     })
 
-    const { data, error } = await query.limit(1)
+    const { data, error } = await query
 
     if (error) {
       console.error('Error checking data exists:', error)
@@ -76,6 +88,13 @@ export const saveGeneratedData = async (dataType, dataValue, metadata = {}, addG
   }
 
   try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      console.log('User not authenticated, skipping data save')
+      return { success: false, error: 'Not authenticated' }
+    }
+
     // Check for duplicates before saving
     const exists = await checkDataExists(dataType, dataValue, metadata)
     if (exists) {
@@ -87,6 +106,7 @@ export const saveGeneratedData = async (dataType, dataValue, metadata = {}, addG
       .from('generated_data')
       .insert([
         {
+          user_id: user.id,
           data_type: dataType,
           data_value: dataValue,
           metadata: metadata
@@ -115,7 +135,7 @@ export const saveGeneratedData = async (dataType, dataValue, metadata = {}, addG
   }
 }
 
-// Universal duplicate prevention for all generators
+// Enhanced duplicate prevention with intelligent generation
 export const generateWithDuplicatePrevention = async (
   dataType, 
   generatorFunction, 
@@ -178,11 +198,19 @@ export const saveEmailHistory = async (email, firstName, lastName, country, styl
   }
 
   try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      console.log('User not authenticated, skipping email save')
+      return { success: false, error: 'Not authenticated' }
+    }
+
     // Save to email_history table
     const { data: emailData, error: emailError } = await supabase
       .from('email_history')
       .insert([
         {
+          user_id: user.id,
           email: email,
           first_name: firstName,
           last_name: lastName,
@@ -206,6 +234,7 @@ export const saveEmailHistory = async (email, firstName, lastName, country, styl
       .from('generated_data')
       .insert([
         {
+          user_id: user.id,
           data_type: 'email',
           data_value: email,
           metadata: {

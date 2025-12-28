@@ -16,6 +16,7 @@ import {
   Filler
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
+import { useAuth } from '../context/AuthContext';
 import { useAppData } from '../context/AppDataContext';
 import { SkeletonStats, SkeletonCard } from './ui/SkeletonLoader';
 import { useToast } from '../context/ToastContext';
@@ -47,6 +48,7 @@ export default function UserDashboard() {
     serverLoad: Math.floor(Math.random() * 20 + 15)
   }), [lastUpdate]);
 
+  const { user } = useAuth();
   const { getDataCountByType, generatedDataCount, recentActivity } = useAppData();
   const { addToast } = useToast();
 
@@ -61,6 +63,8 @@ export default function UserDashboard() {
 
   // Fetch chart data for professional 7-day graphs
   const fetchChartData = useCallback(async () => {
+    if (!user) return;
+
     try {
       const now = new Date();
       const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -136,10 +140,12 @@ export default function UserDashboard() {
     } catch (error) {
       console.error('Error fetching chart data:', error);
     }
-  }, []);
+  }, [user]);
 
   // Fetch real today's and week's data from database
   const fetchTodayData = useCallback(async () => {
+    if (!user) return;
+
     try {
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -167,7 +173,7 @@ export default function UserDashboard() {
     } catch (error) {
       console.error('Error fetching today/week data:', error);
     }
-  }, []);
+  }, [user]);
 
   // Enhanced real-time stats with real database data and generation speeds
   const realtimeStats = useMemo(() => {
@@ -257,6 +263,11 @@ export default function UserDashboard() {
 
   // Optimized data fetching
   const fetchDashboardData = useCallback(async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setGeneratedData(recentActivity.slice(0, 10));
     } catch (error) {
@@ -264,22 +275,24 @@ export default function UserDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [recentActivity]);
+  }, [user, recentActivity]);
 
   // Enhanced real-time updates with better performance
   useEffect(() => {
-    fetchDashboardData();
-    fetchTodayData();
-    fetchChartData();
-    
-    const interval = setInterval(() => {
-      setLastUpdate(Date.now());
+    if (user) {
+      fetchDashboardData();
       fetchTodayData();
       fetchChartData();
-    }, 3000);
+      
+      const interval = setInterval(() => {
+        setLastUpdate(Date.now());
+        fetchTodayData();
+        fetchChartData();
+      }, 3000);
 
-    return () => clearInterval(interval);
-  }, [fetchDashboardData, fetchTodayData, fetchChartData]);
+      return () => clearInterval(interval);
+    }
+  }, [user, fetchDashboardData, fetchTodayData, fetchChartData]);
 
   // Immediate update when recentActivity changes
   useEffect(() => {

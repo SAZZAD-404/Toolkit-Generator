@@ -3,9 +3,11 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import DashboardLayout from './components/DashboardLayout';
 import Footer from './components/Footer';
+import AuthPage from './components/AuthPage';
 import { ToastProvider } from './context/ToastContext';
 import { AppDataProvider } from './context/AppDataContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Lazy load heavy components
 const GmailGenerator = lazy(() => import('./components/GmailGenerator'));
@@ -19,6 +21,7 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { user, loading } = useAuth();
 
   // Check if mobile
   useEffect(() => {
@@ -43,6 +46,23 @@ function AppContent() {
     window.addEventListener('navigate-to-tab', handleNavigateToTab);
     return () => window.removeEventListener('navigate-to-tab', handleNavigateToTab);
   }, []);
+
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-white font-medium">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth page if user is not logged in
+  if (!user) {
+    return <AuthPage />;
+  }
 
   const renderContent = () => {
     const LoadingFallback = () => (
@@ -100,7 +120,7 @@ function AppContent() {
     }
   };
 
-  // Show main application directly (no authentication required)
+  // Show main application for authenticated users
   return (
     <div className="min-h-screen bg-theme-primary">
       {/* Mobile Header */}
@@ -150,11 +170,13 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AppDataProvider>
-        <ToastProvider>
-          <AppContent />
-        </ToastProvider>
-      </AppDataProvider>
+      <AuthProvider>
+        <AppDataProvider>
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
+        </AppDataProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

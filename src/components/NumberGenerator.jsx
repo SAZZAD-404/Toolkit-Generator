@@ -3,6 +3,7 @@ import { Copy, Hash } from 'lucide-react';
 import { Card, CardContent } from './Card';
 import { generatePhoneNumbers, getAreaCodesForCountry } from '../utils/numberGenerator';
 import { saveGeneratedData, getExistingDataValues } from '../utils/dataStorage';
+import { useAuth } from '../context/AuthContext';
 import { useAppData } from '../context/AppDataContext';
 import { useToast } from '../context/ToastContext';
 import DuplicateStatus from './DuplicateStatus';
@@ -18,6 +19,7 @@ export default function NumberGenerator() {
   const [results, setResults] = useState([]);
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
   const { addGeneratedData } = useAppData();
   const { addToast } = useToast();
 

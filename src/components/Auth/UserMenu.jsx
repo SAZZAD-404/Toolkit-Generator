@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import { User, Settings, Database, Activity, Zap } from 'lucide-react'
+import { User, Settings, Database, Activity, Zap, LogOut } from 'lucide-react'
 import { useAppData } from '../../context/AppDataContext'
+import { useAuth } from '../../context/AuthContext'
 
 export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const { generatedDataCount, recentActivity, getTimeAgo } = useAppData()
+  const { user, userProfile, signOut } = useAuth()
   const menuRef = useRef(null)
 
   useEffect(() => {
@@ -18,10 +20,29 @@ export default function UserMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const handleSignOut = async () => {
+    await signOut()
+    setIsOpen(false)
+  }
+
   // Get last activity
   const getLastActivity = () => {
     if (recentActivity.length === 0) return 'No recent activity'
     return getTimeAgo(recentActivity[0].created_at)
+  }
+
+  const getUserInitials = () => {
+    if (userProfile?.name) {
+      return userProfile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase()
+    }
+    return 'U'
+  }
+
+  const getUserDisplayName = () => {
+    return userProfile?.name || user?.email?.split('@')[0] || 'User'
   }
 
   return (
@@ -34,7 +55,7 @@ export default function UserMenu() {
         {/* Avatar */}
         <div className="relative">
           <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-            <User className="w-4 h-4" />
+            {getUserInitials()}
           </div>
           {/* Online indicator */}
           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-slate-800 rounded-full"></div>
@@ -43,7 +64,7 @@ export default function UserMenu() {
         {/* User Info */}
         <div className="hidden sm:block text-left">
           <div className="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">
-            Toolkit User
+            {getUserDisplayName()}
           </div>
           <div className="text-xs text-slate-400">
             {generatedDataCount} items generated
@@ -69,20 +90,20 @@ export default function UserMenu() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white">
-                  <User className="w-6 h-6" />
+                  {getUserInitials()}
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-slate-800 rounded-full"></div>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-white font-semibold">Toolkit User</h3>
+                  <h3 className="text-white font-semibold">{getUserDisplayName()}</h3>
                   <Zap className="text-yellow-400" size={16} />
                 </div>
                 <div className="text-slate-300 text-sm">
-                  Professional Data Generator
+                  {user?.email}
                 </div>
                 <div className="text-slate-400 text-xs mt-1">
-                  No login required • Free to use
+                  Member since {new Date(user?.created_at).toLocaleDateString()}
                 </div>
               </div>
             </div>
@@ -146,6 +167,20 @@ export default function UserMenu() {
               <div className="text-left">
                 <div className="text-sm font-medium">All Generated Data</div>
                 <div className="text-xs text-slate-400">{generatedDataCount} items saved</div>
+              </div>
+            </button>
+
+            {/* Logout Button */}
+            <button 
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 px-3 py-3 text-slate-300 hover:bg-red-500/10 rounded-lg transition-colors group mt-2 border-t border-slate-600"
+            >
+              <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center group-hover:bg-red-500/30 transition-colors">
+                <LogOut className="text-red-400" size={16} />
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-medium text-red-400">Sign Out</div>
+                <div className="text-xs text-slate-400">End your session</div>
               </div>
             </button>
           </div>
