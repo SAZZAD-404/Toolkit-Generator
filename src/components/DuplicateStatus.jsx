@@ -1,28 +1,26 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle, AlertCircle, Database } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+// import { useAuth } from '../context/AuthContext'
 import { getExistingDataValues } from '../utils/dataStorage'
 
 export default function DuplicateStatus({ dataType = 'email' }) {
   const [existingCount, setExistingCount] = useState(0)
   const [loading, setLoading] = useState(true)
-  const { user } = useAuth()
+  // const { user } = useAuth()
 
   useEffect(() => {
     const fetchExistingCount = async () => {
-      if (user) {
-        try {
-          const existingData = await getExistingDataValues(dataType)
-          setExistingCount(existingData.length)
-        } catch (error) {
-          console.error('Error fetching existing data count:', error)
-        }
+      try {
+        const existingData = await getExistingDataValues(dataType)
+        setExistingCount(existingData.length)
+      } catch (error) {
+        console.error('Error fetching existing data count:', error)
       }
       setLoading(false)
     }
 
     fetchExistingCount()
-  }, [user, dataType])
+  }, [dataType])
 
   if (loading) {
     return (

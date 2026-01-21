@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { supabase, isSupabaseConfigured, testConnection, getConnectionStatus } from '../lib/supabase'
 
 const AuthContext = createContext({})
 
@@ -15,40 +15,125 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [userProfile, setUserProfile] = useState(null)
+  const [connectionStatus, setConnectionStatus] = useState({ status: 'unknown', error: null })
+
+  // Test Supabase connection on startup
+  useEffect(() => {
+    const checkConnection = async () => {
+      console.log('🔧 Testing Supabase connection...')
+      console.log('🔧 Supabase URL:', import.meta.env.VITE_SUPABASE_URL)
+      console.log('🔧 Supabase configured:', isSupabaseConfigured)
+      
+      if (!isSupabaseConfigured) {
+        setConnectionStatus({ status: 'invalid_credentials', error: 'Supabase credentials not configured' })
+        setLoading(false)
+        return
+      }
+
+      const isConnected = await testConnection()
+      const status = getConnectionStatus()
+      setConnectionStatus(status)
+      
+      console.log('🔧 Connection test result:', status)
+      
+      if (!isConnected) {
+        console.log('❌ Supabase connection failed:', status.error)
+        setLoading(false)
+        return
+      }
+      
+      console.log('✅ Supabase connection successful')
+    }
+
+    checkConnection()
+  }, [])
 
   useEffect(() => {
+    // Check if user wants to use localStorage only
+    const useLocalStorage = localStorage.getItem('useLocalStorage') === 'true';
+    if (useLocalStorage) {
+      console.log('🔧 Using localStorage mode');
+      setLoading(false);
+      return;
+    }
+
+    // Don't proceed with auth if connection failed
+    if (connectionStatus.status !== 'unknown' && connectionStatus.status !== 'connected') {
+      setLoading(false);
+      return;
+    }
+
+    // Set a timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      console.log('⚠️ Authentication loading timeout, proceeding without auth');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
-        setUser(session?.user ?? null)
+        if (!isSupabaseConfigured || connectionStatus.status !== 'connected') {
+          console.log('⚠️ Supabase not ready, skipping authentication');
+          setLoading(false);
+          clearTimeout(loadingTimeout);
+          return;
+        }
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('❌ Auth session error:', error);
+          setLoading(false);
+          clearTimeout(loadingTimeout);
+          return;
+        }
+
+        setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchUserProfile(session.user.id)
+          await fetchUserProfile(session.user.id);
         }
       } catch (error) {
-        console.error('Error getting initial session:', error)
+        console.error('❌ Error getting initial session:', error);
+        setUser(null);
       } finally {
-        setLoading(false)
+        setLoading(false);
+        clearTimeout(loadingTimeout);
+      }
+    };
+
+    // Only get session if we have a successful connection
+    if (connectionStatus.status === 'connected') {
+      getInitialSession();
+    }
+
+    // Only set up auth listener if Supabase is configured and connected
+    if (isSupabaseConfigured && connectionStatus.status === 'connected') {
+      try {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            setUser(session?.user ?? null);
+            if (session?.user) {
+              await fetchUserProfile(session.user.id);
+            } else {
+              setUserProfile(null);
+            }
+            setLoading(false);
+          }
+        );
+
+        return () => {
+          subscription.unsubscribe();
+          clearTimeout(loadingTimeout);
+        };
+      } catch (error) {
+        console.error('❌ Error setting up auth listener:', error);
+        setLoading(false);
+        clearTimeout(loadingTimeout);
       }
     }
 
-    getInitialSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          await fetchUserProfile(session.user.id)
-        } else {
-          setUserProfile(null)
-        }
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => clearTimeout(loadingTimeout);
+  }, [connectionStatus.status]);
 
   const fetchUserProfile = async (userId) => {
     try {
@@ -179,12 +264,14 @@ export const AuthProvider = ({ children }) => {
     user,
     userProfile,
     loading,
+    connectionStatus,
     signUp,
     signIn,
     signOut,
     updateProfile,
     resetPassword,
-    isConfigured: isSupabaseConfigured
+    isConfigured: isSupabaseConfigured,
+    isConnected: connectionStatus.status === 'connected'
   }
 
   return (

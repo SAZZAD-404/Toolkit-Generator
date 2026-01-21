@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react'
 import { Mail, Smartphone, Globe, Hash, Calendar, Search, Filter, Download, Eye, Copy } from 'lucide-react'
-import { supabase } from '../lib/supabase'
-import { useAuth } from '../context/AuthContext'
-import { useAppData } from '../context/AppDataContext'
+import { getAllGeneratedData } from '../utils/dataStorage'
 import { useToast } from '../context/ToastContext'
+
+// Simple time ago function
+const getTimeAgo = (dateString) => {
+  const now = new Date()
+  const date = new Date(dateString)
+  const diffInSeconds = Math.floor((now - date) / 1000)
+  
+  if (diffInSeconds < 60) return 'Just now'
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`
+  return date.toLocaleDateString()
+}
 
 export default function AllDataPage() {
   const [generatedData, setGeneratedData] = useState([])
@@ -13,36 +24,48 @@ export default function AllDataPage() {
   const [sortBy, setSortBy] = useState('created_at')
   const [sortOrder, setSortOrder] = useState('desc')
   const [selectedItems, setSelectedItems] = useState([])
-  const { user } = useAuth()
-  const { fetchDataCount, getTimeAgo } = useAppData()
-  const { addToast } = useToast()
+  const { toast } = useToast()
+
+  // Simple time ago function - removed duplicate definition
 
   useEffect(() => {
-    if (user) {
-      fetchGeneratedData()
-    }
-  }, [user, filter, sortBy, sortOrder])
+    fetchGeneratedData()
+  }, [filter, sortBy, sortOrder])
 
   const fetchGeneratedData = async () => {
+    console.log('🔄 Fetching all generated data...');
+    setLoading(true);
+    
     try {
-      let query = supabase
-        .from('generated_data')
-        .select('*')
-
+      const data = await getAllGeneratedData();
+      console.log('📊 Fetched data:', data.length, 'items');
+      
+      let filteredData = data;
+      
+      // Apply filter
       if (filter !== 'all') {
-        query = query.eq('data_type', filter)
+        filteredData = data.filter(item => item.dataType === filter || item.data_type === filter);
       }
-
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' })
-
-      const { data, error } = await query
-
-      if (error) throw error
-      setGeneratedData(data || [])
+      
+      // Apply sorting
+      filteredData.sort((a, b) => {
+        const aValue = a[sortBy] || a.createdAt || a.created_at;
+        const bValue = b[sortBy] || b.createdAt || b.created_at;
+        
+        if (sortOrder === 'asc') {
+          return new Date(aValue) - new Date(bValue);
+        } else {
+          return new Date(bValue) - new Date(aValue);
+        }
+      });
+      
+      setGeneratedData(filteredData);
+      console.log('✅ Data loaded successfully:', filteredData.length, 'items after filtering');
     } catch (error) {
-      console.error('Error fetching data:', error)
+      console.error('❌ Error fetching data:', error);
+      toast.error('Error loading data');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -68,12 +91,12 @@ export default function AllDataPage() {
     a.download = `generated-data-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     window.URL.revokeObjectURL(url)
-    addToast('Data exported successfully', 'success')
+    toast.success('Data exported successfully')
   }
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
-    addToast('Copied to clipboard', 'success')
+    toast.success('Copied to clipboard')
   }
 
   const toggleSelectItem = (id) => {
@@ -112,10 +135,14 @@ export default function AllDataPage() {
     }
   }
 
-  const filteredData = generatedData.filter(item =>
-    item.data_value.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.data_type.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredData = generatedData.filter(item => {
+    // Ensure item has the required properties
+    const dataValue = item.data_value || item.dataValue || '';
+    const dataType = item.data_type || item.dataType || '';
+    
+    return dataValue.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           dataType.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   if (loading) {
     return (
@@ -309,10 +336,10 @@ export default function AllDataPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="text-slate-300 text-sm">
-                          {getTimeAgo(item.created_at)}
+                          {getTimeAgo(item.created_at || item.createdAt)}
                         </div>
                         <div className="text-slate-500 text-xs">
-                          {new Date(item.created_at).toLocaleDateString()}
+                          {new Date(item.created_at || item.createdAt).toLocaleDateString()}
                         </div>
                       </td>
                       <td className="py-3 px-4">

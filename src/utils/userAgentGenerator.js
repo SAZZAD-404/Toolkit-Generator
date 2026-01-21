@@ -256,10 +256,12 @@ const getVersionsByType = (browser, platform, versionType) => {
 };
 
 // Generate iOS UA for Facebook
-function buildIOSUA(country = 'global', version = 'latest') {
+function buildIOSUA(country = 'global', version = 'latest', specificDevice = null) {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
-  const device = randChoice(iPhoneModels);
+  
+  // Use specific device if provided, otherwise random
+  const device = specificDevice && specificDevice !== 'random' ? specificDevice : randChoice(iPhoneModels);
   
   // Get version-specific Facebook app version
   const versionArray = getVersionsByType('facebook', 'ios', version);
@@ -306,10 +308,12 @@ function buildIOSUA(country = 'global', version = 'latest') {
 }
 
 // Generate iOS UA for Facebook Lite (Messenger Lite style)
-function buildIOSFBLiteUA(country = 'global', version = 'latest') {
+function buildIOSFBLiteUA(country = 'global', version = 'latest', specificDevice = null) {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
-  const device = randChoice(iPhoneModels);
+  
+  // Use specific device if provided, otherwise random
+  const device = specificDevice && specificDevice !== 'random' ? specificDevice : randChoice(iPhoneModels);
   
   // Get version-specific Facebook Lite version
   const versionArray = getVersionsByType('facebook_lite', 'ios', version);
@@ -335,10 +339,12 @@ function buildIOSFBLiteUA(country = 'global', version = 'latest') {
 }
 
 // Generate iOS UA for Instagram (Real Instagram Format)
-function buildIOSInstagramUA(country = 'global', version = 'latest') {
+function buildIOSInstagramUA(country = 'global', version = 'latest', specificDevice = null) {
   const iosVer = randChoice(iosVersions);
   const iosDot = iosVer.replace(/_/g, '.');
-  const device = randChoice(iPhoneModels);
+  
+  // Use specific device if provided, otherwise random
+  const device = specificDevice && specificDevice !== 'random' ? specificDevice : randChoice(iPhoneModels);
   
   // Country-specific locale
   const countryLocales = localesByCountry[country] || localesByCountry.global;
@@ -424,9 +430,12 @@ function buildIOSInstagramUA(country = 'global', version = 'latest') {
 }
 
 // Build Android UA (FB_IAB style) - Real format
-function buildAndroidUA(country = 'global', version = 'latest') {
+function buildAndroidUA(country = 'global', version = 'latest', specificDevice = null) {
   const models = androidModelsByCountry[country] || androidModelsByCountry.global;
-  const model = randChoice(models);
+  
+  // Use specific device if provided, otherwise random
+  const model = specificDevice && specificDevice !== 'random' ? specificDevice : randChoice(models);
+  
   const os = randChoice(androidVersions);
   const chrome = randChromeVer();
   
@@ -452,9 +461,12 @@ function buildAndroidUA(country = 'global', version = 'latest') {
 }
 
 // Build Android UA for Facebook Lite
-function buildAndroidFBLiteUA(country = 'global', version = 'latest') {
+function buildAndroidFBLiteUA(country = 'global', version = 'latest', specificDevice = null) {
   const models = androidModelsByCountry[country] || androidModelsByCountry.global;
-  const model = randChoice(models);
+  
+  // Use specific device if provided, otherwise random
+  const model = specificDevice && specificDevice !== 'random' ? specificDevice : randChoice(models);
+  
   const os = randChoice(androidVersions);
   const chrome = randChromeVer();
   
@@ -477,9 +489,12 @@ function buildAndroidFBLiteUA(country = 'global', version = 'latest') {
 }
 
 // Build Android UA for Instagram (Real Instagram Format)
-function buildAndroidInstagramUA(country = 'global', version = 'latest') {
+function buildAndroidInstagramUA(country = 'global', version = 'latest', specificDevice = null) {
   const models = androidModelsByCountry[country] || androidModelsByCountry.global;
-  const model = randChoice(models);
+  
+  // Use specific device if provided, otherwise random
+  const model = specificDevice && specificDevice !== 'random' ? specificDevice : randChoice(models);
+  
   const os = randChoice(androidVersions);
   const chrome = randChromeVer();
   
@@ -525,49 +540,186 @@ function buildAndroidInstagramUA(country = 'global', version = 'latest') {
 }
 
 // Generate Android User Agent
-const generateAndroidUA = (browser, version, country = 'global') => {
+const generateAndroidUA = (browser, version, country = 'global', specificDevice = null) => {
   // Only Facebook, FB Lite, and Instagram supported
   if (browser === 'facebook') {
-    return buildAndroidUA(country, version);
+    return buildAndroidUA(country, version, specificDevice);
   }
   if (browser === 'facebook_lite') {
-    return buildAndroidFBLiteUA(country, version);
+    return buildAndroidFBLiteUA(country, version, specificDevice);
   }
   if (browser === 'instagram') {
-    return buildAndroidInstagramUA(country, version);
+    return buildAndroidInstagramUA(country, version, specificDevice);
   }
   
   // Default to Facebook if invalid browser
-  return buildAndroidUA(country, version);
+  return buildAndroidUA(country, version, specificDevice);
 };
 
 // Generate iPhone User Agent
-const generateiPhoneUA = (browser, version, country = 'global') => {
+const generateiPhoneUA = (browser, version, country = 'global', specificDevice = null) => {
   // Only Facebook, FB Lite, and Instagram supported
   if (browser === 'facebook') {
-    return buildIOSUA(country, version);
+    return buildIOSUA(country, version, specificDevice);
   }
   if (browser === 'facebook_lite') {
-    return buildIOSFBLiteUA(country, version);
+    return buildIOSFBLiteUA(country, version, specificDevice);
   }
   if (browser === 'instagram') {
-    return buildIOSInstagramUA(country, version);
+    return buildIOSInstagramUA(country, version, specificDevice);
   }
   
   // Default to Facebook if invalid browser
-  return buildIOSUA(country, version);
+  return buildIOSUA(country, version, specificDevice);
 };
 
-export const generateUserAgents = (device, browser, version, count, country = 'global') => {
+// Get preview of random device selection
+export const getRandomDevicePreview = (deviceType, selectionMode = 'mixed') => {
+  const availableDevices = availableDeviceChoices[deviceType]?.filter(d => d.value !== 'random') || [];
+  
+  if (availableDevices.length === 0) {
+    return { description: 'No devices available', examples: [] };
+  }
+  
+  let description = '';
+  let examples = [];
+  
+  switch (selectionMode) {
+    case 'latest':
+      description = 'Newer models only';
+      examples = availableDevices.slice(0, 3).map(d => d.label.replace('📱 ', ''));
+      break;
+    case 'popular':
+      const popularCategories = deviceType === 'android' 
+        ? ['Samsung Galaxy S', 'Google Pixel', 'OnePlus']
+        : ['iPhone 15 Series', 'iPhone 14 Series', 'iPhone 13 Series'];
+      const popularDevices = availableDevices.filter(device => 
+        popularCategories.includes(device.category)
+      );
+      description = 'Popular brands only';
+      examples = popularDevices.slice(0, 3).map(d => d.label.replace('📱 ', ''));
+      break;
+    case 'category':
+      const categories = [...new Set(availableDevices.map(d => d.category))];
+      description = `Single category (e.g., ${categories[0]})`;
+      const categoryDevices = availableDevices.filter(d => d.category === categories[0]);
+      examples = categoryDevices.slice(0, 3).map(d => d.label.replace('📱 ', ''));
+      break;
+    default:
+      description = 'All device types';
+      examples = availableDevices.slice(0, 3).map(d => d.label.replace('📱 ', ''));
+      break;
+  }
+  
+  return { description, examples: examples.slice(0, 3) };
+};
+export const generateRandomDeviceSelection = (deviceType, count = 5, options = {}) => {
+  const availableDevices = availableDeviceChoices[deviceType]?.filter(d => d.value !== 'random') || [];
+  
+  if (availableDevices.length === 0) {
+    return ['random'];
+  }
+  
+  const { 
+    preferredCategories = [], 
+    selectionMode = 'mixed', // 'mixed', 'category', 'latest', 'popular'
+    maxDevices = 5 
+  } = options;
+  
+  let devicesToChooseFrom = [...availableDevices];
+  
+  // Filter by preferred categories if specified
+  if (preferredCategories.length > 0) {
+    devicesToChooseFrom = availableDevices.filter(device => 
+      preferredCategories.includes(device.category)
+    );
+  }
+  
+  // Apply selection mode
+  switch (selectionMode) {
+    case 'latest':
+      // Prefer newer devices (first in list are usually newer)
+      devicesToChooseFrom = devicesToChooseFrom.slice(0, Math.ceil(devicesToChooseFrom.length * 0.6));
+      break;
+    case 'popular':
+      // Focus on popular brands/models
+      const popularCategories = deviceType === 'android' 
+        ? ['Samsung Galaxy S', 'Google Pixel', 'OnePlus']
+        : ['iPhone 15 Series', 'iPhone 14 Series', 'iPhone 13 Series'];
+      devicesToChooseFrom = availableDevices.filter(device => 
+        popularCategories.includes(device.category)
+      );
+      break;
+    case 'category':
+      // Select from one random category
+      const categories = [...new Set(devicesToChooseFrom.map(d => d.category))];
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      devicesToChooseFrom = devicesToChooseFrom.filter(d => d.category === randomCategory);
+      break;
+    default:
+      // Mixed - use all available devices
+      break;
+  }
+  
+  // Fallback if filtering resulted in empty array
+  if (devicesToChooseFrom.length === 0) {
+    devicesToChooseFrom = availableDevices;
+  }
+  
+  // Determine how many devices to select - Fixed logic
+  // Check if we want single or multiple device selection
+  let selectionCount;
+  
+  if (maxDevices === 1) {
+    // Single device selection
+    selectionCount = 1;
+  } else {
+    // Multiple device selection - Always try to select multiple devices for better variety
+    const minSelection = Math.min(2, devicesToChooseFrom.length);
+    const maxSelection = Math.min(maxDevices, devicesToChooseFrom.length);
+    
+    // Select between 2-5 devices, but respect the available devices limit
+    selectionCount = devicesToChooseFrom.length === 1 ? 1 : 
+                    Math.max(minSelection, Math.min(maxSelection, Math.ceil(count / 2)));
+  }
+  
+  // Randomly select devices without duplicates
+  const shuffled = [...devicesToChooseFrom].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, selectionCount);
+  
+  return selected.map(device => device.value);
+};
+
+export const generateUserAgents = (device, browser, version, count, country = 'global', specificDevices = null) => {
   const results = [];
-  for (let i = 0; i < count; i++) {
-    if (device === 'android') {
-      results.push(generateAndroidUA(browser, version, country));
-    } else {
-      results.push(generateiPhoneUA(browser, version, country));
+  const usedDevices = [];
+  
+  // If specificDevices is an array, use only those devices
+  if (Array.isArray(specificDevices) && specificDevices.length > 0 && !specificDevices.includes('random')) {
+    for (let i = 0; i < count; i++) {
+      // Cycle through selected devices - this ensures we use all selected devices
+      const selectedDevice = specificDevices[i % specificDevices.length];
+      usedDevices.push(selectedDevice);
+      if (device === 'android') {
+        results.push(generateAndroidUA(browser, version, country, selectedDevice));
+      } else {
+        results.push(generateiPhoneUA(browser, version, country, selectedDevice));
+      }
+    }
+  } else {
+    // Original logic for random or single device
+    const singleDevice = Array.isArray(specificDevices) ? null : specificDevices;
+    for (let i = 0; i < count; i++) {
+      usedDevices.push(singleDevice || 'random');
+      if (device === 'android') {
+        results.push(generateAndroidUA(browser, version, country, singleDevice));
+      } else {
+        results.push(generateiPhoneUA(browser, version, country, singleDevice));
+      }
     }
   }
-  return results;
+  
+  return { userAgents: results, devices: usedDevices };
 };
 
 // Export available countries
@@ -577,3 +729,80 @@ export const availableCountries = [
   { value: 'japan', label: 'Japan' },
   { value: 'global', label: 'Global (Mixed)' }
 ];
+
+// Export available device choices
+export const availableDeviceChoices = {
+  iphone: [
+    { value: 'random', label: '🔀 Random iPhone', category: 'Random' },
+    { value: 'iPhone16,2', label: '📱 iPhone 15 Pro Max', category: 'iPhone 15 Series' },
+    { value: 'iPhone16,1', label: '📱 iPhone 15 Pro', category: 'iPhone 15 Series' },
+    { value: 'iPhone15,5', label: '📱 iPhone 15 Plus', category: 'iPhone 15 Series' },
+    { value: 'iPhone15,4', label: '📱 iPhone 15', category: 'iPhone 15 Series' },
+    { value: 'iPhone15,3', label: '📱 iPhone 14 Pro Max', category: 'iPhone 14 Series' },
+    { value: 'iPhone15,2', label: '📱 iPhone 14 Pro', category: 'iPhone 14 Series' },
+    { value: 'iPhone14,8', label: '📱 iPhone 14 Plus', category: 'iPhone 14 Series' },
+    { value: 'iPhone14,7', label: '📱 iPhone 14', category: 'iPhone 14 Series' },
+    { value: 'iPhone14,3', label: '📱 iPhone 13 Pro Max', category: 'iPhone 13 Series' },
+    { value: 'iPhone14,2', label: '📱 iPhone 13 Pro', category: 'iPhone 13 Series' },
+    { value: 'iPhone14,5', label: '📱 iPhone 13', category: 'iPhone 13 Series' },
+    { value: 'iPhone14,4', label: '📱 iPhone 13 mini', category: 'iPhone 13 Series' },
+    { value: 'iPhone13,4', label: '📱 iPhone 12 Pro Max', category: 'iPhone 12 Series' },
+    { value: 'iPhone13,3', label: '📱 iPhone 12 Pro', category: 'iPhone 12 Series' },
+    { value: 'iPhone13,2', label: '📱 iPhone 12', category: 'iPhone 12 Series' },
+    { value: 'iPhone13,1', label: '📱 iPhone 12 mini', category: 'iPhone 12 Series' },
+    { value: 'iPhone12,5', label: '📱 iPhone 11 Pro Max', category: 'iPhone 11 Series' },
+    { value: 'iPhone12,3', label: '📱 iPhone 11 Pro', category: 'iPhone 11 Series' },
+    { value: 'iPhone12,1', label: '📱 iPhone 11', category: 'iPhone 11 Series' }
+  ],
+  android: [
+    { value: 'random', label: '🔀 Random Android', category: 'Random' },
+    // Samsung Galaxy S Series
+    { value: 'SM-S928U', label: '📱 Galaxy S24 Ultra', category: 'Samsung Galaxy S' },
+    { value: 'SM-S926U', label: '📱 Galaxy S24+', category: 'Samsung Galaxy S' },
+    { value: 'SM-S921U', label: '📱 Galaxy S24', category: 'Samsung Galaxy S' },
+    { value: 'SM-S918U', label: '📱 Galaxy S23 Ultra', category: 'Samsung Galaxy S' },
+    { value: 'SM-S916U', label: '📱 Galaxy S23+', category: 'Samsung Galaxy S' },
+    { value: 'SM-S911U', label: '📱 Galaxy S23', category: 'Samsung Galaxy S' },
+    { value: 'SM-S908U', label: '📱 Galaxy S22 Ultra', category: 'Samsung Galaxy S' },
+    { value: 'SM-S906U', label: '📱 Galaxy S22+', category: 'Samsung Galaxy S' },
+    { value: 'SM-S901U', label: '📱 Galaxy S22', category: 'Samsung Galaxy S' },
+    // Samsung Galaxy Z Series
+    { value: 'SM-F956U', label: '📱 Galaxy Z Fold 6', category: 'Samsung Galaxy Z' },
+    { value: 'SM-F946U', label: '📱 Galaxy Z Fold 5', category: 'Samsung Galaxy Z' },
+    { value: 'SM-F936U', label: '📱 Galaxy Z Fold 4', category: 'Samsung Galaxy Z' },
+    { value: 'SM-F731U', label: '📱 Galaxy Z Flip 5', category: 'Samsung Galaxy Z' },
+    { value: 'SM-F721U', label: '📱 Galaxy Z Flip 4', category: 'Samsung Galaxy Z' },
+    // Google Pixel
+    { value: 'Pixel 9 Pro XL', label: '📱 Pixel 9 Pro XL', category: 'Google Pixel' },
+    { value: 'Pixel 9 Pro', label: '📱 Pixel 9 Pro', category: 'Google Pixel' },
+    { value: 'Pixel 9', label: '📱 Pixel 9', category: 'Google Pixel' },
+    { value: 'Pixel 8 Pro', label: '📱 Pixel 8 Pro', category: 'Google Pixel' },
+    { value: 'Pixel 8', label: '📱 Pixel 8', category: 'Google Pixel' },
+    { value: 'Pixel 8a', label: '📱 Pixel 8a', category: 'Google Pixel' },
+    { value: 'Pixel 7 Pro', label: '📱 Pixel 7 Pro', category: 'Google Pixel' },
+    { value: 'Pixel 7', label: '📱 Pixel 7', category: 'Google Pixel' },
+    { value: 'Pixel 7a', label: '📱 Pixel 7a', category: 'Google Pixel' },
+    // OnePlus
+    { value: 'CPH2609', label: '📱 OnePlus 12', category: 'OnePlus' },
+    { value: 'CPH2617', label: '📱 OnePlus 12R', category: 'OnePlus' },
+    { value: 'CPH2449', label: '📱 OnePlus 11', category: 'OnePlus' },
+    { value: 'CPH2451', label: '📱 OnePlus 11R', category: 'OnePlus' },
+    { value: 'LE2125', label: '📱 OnePlus 9 Pro', category: 'OnePlus' },
+    { value: 'LE2123', label: '📱 OnePlus 9', category: 'OnePlus' },
+    // Xiaomi
+    { value: '23013RK75G', label: '📱 Xiaomi 13 Ultra', category: 'Xiaomi' },
+    { value: '23078RKD5G', label: '📱 Xiaomi 13 Pro', category: 'Xiaomi' },
+    { value: '23090RA98G', label: '📱 Xiaomi 13', category: 'Xiaomi' },
+    { value: '2201123G', label: '📱 Mi 12 Ultra', category: 'Xiaomi' },
+    { value: '2211133G', label: '📱 Mi 12 Pro', category: 'Xiaomi' },
+    { value: '2210132G', label: '📱 Mi 12', category: 'Xiaomi' },
+    // Nothing Phone
+    { value: 'A063', label: '📱 Nothing Phone (2)', category: 'Nothing' },
+    { value: 'A065', label: '📱 Nothing Phone (2a)', category: 'Nothing' },
+    { value: 'A142', label: '📱 Nothing Phone (1)', category: 'Nothing' },
+    // Sony Xperia
+    { value: 'XQ-DQ72', label: '📱 Xperia 1 V', category: 'Sony Xperia' },
+    { value: 'XQ-CQ72', label: '📱 Xperia 5 V', category: 'Sony Xperia' },
+    { value: 'XQ-BC72', label: '📱 Xperia 10 V', category: 'Sony Xperia' }
+  ]
+};

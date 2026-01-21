@@ -53,11 +53,15 @@ export default function GmailGenerator() {
           );
           
           // Save to database if user is logged in
+          console.log('👤 User status:', user ? 'Logged in' : 'Not logged in');
+          console.log('📧 Generated emails count:', generated.length);
+          
           if (user) {
             try {
+              console.log('💾 Saving emails to database...');
               // Save each generated email to the database
               for (const result of generated) {
-                await saveEmailHistory(
+                const saveResult = await saveEmailHistory(
                   result.email,
                   result.firstName,
                   result.lastName,
@@ -65,11 +69,37 @@ export default function GmailGenerator() {
                   style,
                   addGeneratedData
                 );
+                console.log('📧 Email save result:', saveResult.success ? '✅' : '❌', result.email);
+              }
+              console.log('✅ All emails saved successfully');
+            } catch (error) {
+              console.error('❌ Error saving generated data:', error);
+            }
+          } else {
+            console.log('⚠️ User not logged in, emails will be saved to localStorage only');
+            // Still save to localStorage for non-authenticated users
+            try {
+              for (const result of generated) {
+                const saveResult = await saveEmailHistory(
+                  result.email,
+                  result.firstName,
+                  result.lastName,
+                  country,
+                  style,
+                  addGeneratedData
+                );
+                console.log('📧 Email localStorage save:', saveResult.success ? '✅' : '❌', result.email);
               }
             } catch (error) {
-              console.error('Error saving generated data:', error);
+              console.error('❌ Error saving to localStorage:', error);
             }
           }
+          
+          // Trigger dashboard update
+          window.dispatchEvent(new CustomEvent('generationComplete', {
+            detail: { type: 'email', count: generated.length }
+          }));
+          console.log('📡 Dashboard update event triggered');
         } else {
           toast.warning(
             'No New Emails', 

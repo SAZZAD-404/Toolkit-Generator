@@ -1,5 +1,38 @@
 /* Performance Optimizations */
 
+/* Remove any unwanted cursor styles */
+* {
+  cursor: default;
+}
+
+/* Proper cursor styles for interactive elements */
+button, 
+a, 
+[role="button"], 
+input[type="button"], 
+input[type="submit"], 
+input[type="reset"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+textarea,
+select,
+.cursor-text {
+  cursor: text !important;
+}
+
+/* Remove text cursor from non-text elements */
+div, span, p, h1, h2, h3, h4, h5, h6, 
+.cursor-default {
+  cursor: default !important;
+}
+
 /* Reduce paint and layout thrashing */
 * {
   box-sizing: border-box;

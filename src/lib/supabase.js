@@ -6,8 +6,61 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 // Check if we have valid Supabase credentials
 const hasValidCredentials = supabaseUrl && 
   supabaseAnonKey && 
-  supabaseUrl !== 'https://your-project-id.supabase.co' &&
-  supabaseAnonKey !== 'your-anon-key-here'
+  supabaseUrl.includes('supabase.co') &&
+  supabaseAnonKey.length > 50
+
+// Test connection to Supabase URL
+let connectionStatus = 'unknown'
+let connectionError = null
+
+const testConnection = async () => {
+  if (!hasValidCredentials) {
+    connectionStatus = 'invalid_credentials'
+    connectionError = 'Invalid Supabase credentials'
+    return false
+  }
+
+  try {
+    // Test if the URL resolves
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+    
+    const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+      method: 'HEAD',
+      signal: controller.signal,
+      headers: {
+        'apikey': supabaseAnonKey
+      }
+    })
+    
+    clearTimeout(timeoutId)
+    
+    if (response.ok || response.status === 401) {
+      // 401 is expected without proper auth, but means the server is reachable
+      connectionStatus = 'connected'
+      connectionError = null
+      return true
+    } else {
+      connectionStatus = 'server_error'
+      connectionError = `Server returned ${response.status}: ${response.statusText}`
+      return false
+    }
+  } catch (error) {
+    clearTimeout(timeoutId)
+    
+    if (error.name === 'AbortError') {
+      connectionStatus = 'timeout'
+      connectionError = 'Connection timeout - server not responding'
+    } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      connectionStatus = 'network_error'
+      connectionError = 'Network error - URL may not exist or DNS resolution failed'
+    } else {
+      connectionStatus = 'unknown_error'
+      connectionError = error.message
+    }
+    return false
+  }
+}
 
 // Create a mock client if credentials are not configured
 const createMockClient = () => ({
@@ -32,3 +85,5 @@ export const supabase = hasValidCredentials
   : createMockClient()
 
 export const isSupabaseConfigured = hasValidCredentials
+export const getConnectionStatus = () => ({ status: connectionStatus, error: connectionError })
+export { testConnection }

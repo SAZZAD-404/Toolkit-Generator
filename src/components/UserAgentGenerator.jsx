@@ -1,9 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Copy, Smartphone, Download } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Card';
-import { Button } from './Button';
-import { Select } from './Select';
-import { generateUserAgents, availableCountries } from '../utils/userAgentGenerator';
+import { Card, CardContent } from './Card';
+import { generateUserAgents, availableCountries, availableDeviceChoices, generateRandomDeviceSelection, getRandomDevicePreview } from '../utils/userAgentGenerator';
 import { saveGeneratedData, getExistingDataValues } from '../utils/dataStorage';
 import { useAuth } from '../context/AuthContext';
 import { useAppData } from '../context/AppDataContext';
@@ -16,8 +14,13 @@ export default function UserAgentGenerator() {
   const [version, setVersion] = useState('mix');
   const [count, setCount] = useState(5);
   const [country, setCountry] = useState('usa');
+  const [deviceChoice, setDeviceChoice] = useState(['random']);
+  const [randomSelectionMode, setRandomSelectionMode] = useState('mixed');
+  const [multipleDeviceSelection, setMultipleDeviceSelection] = useState(true);
+  const [showDeviceDropdown, setShowDeviceDropdown] = useState(false);
   const [results, setResults] = useState([]);
   const [resultDevices, setResultDevices] = useState([]);
+  const [resultSelectionMode, setResultSelectionMode] = useState(null);
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,16 +28,192 @@ export default function UserAgentGenerator() {
   const iosPercent = 100 - androidPercent;
   const { user } = useAuth();
   const { addGeneratedData } = useAppData();
-  const { addToast } = useToast();
+  const { toast } = useToast();
+  const dropdownRef = useRef(null);
+
+  // Reset device choice when device platform changes
+  useEffect(() => {
+    setDeviceChoice(['random']);
+    setShowDeviceDropdown(false);
+  }, [device]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDeviceDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Handle random device selection
+  const handleRandomDeviceSelection = () => {
+    if (device === 'mix') return; // Don't allow for mix mode
+    
+    const randomDevices = generateRandomDeviceSelection(device, count, {
+      selectionMode: randomSelectionMode,
+      maxDevices: multipleDeviceSelection ? 5 : 1
+    });
+    
+    setDeviceChoice(randomDevices);
+    
+    const modeLabels = {
+      mixed: 'Mixed',
+      latest: 'Latest',
+      popular: 'Popular',
+      category: 'Single Category'
+    };
+    
+    toast.success(`🎲 Randomly selected ${randomDevices.length} ${modeLabels[randomSelectionMode].toLowerCase()} device${randomDevices.length > 1 ? 's' : ''}!`);
+  };
+
+  // Handle quick random generation
+  const handleQuickRandomGeneration = async () => {
+    if (device === 'mix') {
+      // For mix mode, just generate normally
+      await handleGenerate();
+    } else {
+      // First randomly select devices, then generate
+      const randomDevices = generateRandomDeviceSelection(device, count, {
+        selectionMode: randomSelectionMode,
+        maxDevices: multipleDeviceSelection ? 5 : 1
+      });
+      setDeviceChoice(randomDevices);
+      
+      // Small delay to let state update, then generate
+      setTimeout(async () => {
+        await handleGenerate();
+      }, 100);
+      
+      toast.success(`🚀 Quick generating with ${randomDevices.length} random device${randomDevices.length > 1 ? 's' : ''}!`);
+    }
+  };
+
+  // Handle shuffling current device selection
+  const handleShuffleDevices = () => {
+    if (device === 'mix' || deviceChoice.includes('random') || deviceChoice.length <= 1) return;
+    
+    const shuffled = [...deviceChoice].sort(() => Math.random() - 0.5);
+    setDeviceChoice(shuffled);
+    toast.success(`🔀 Shuffled ${shuffled.length} selected devices!`);
+  };
+
+  // Handle multiple device selection
+  const handleDeviceToggle = (deviceValue) => {
+    if (deviceValue === 'random') {
+      setDeviceChoice(['random']);
+    } else {
+      setDeviceChoice(prev => {
+        const filtered = prev.filter(d => d !== 'random');
+        if (filtered.includes(deviceValue)) {
+          const newSelection = filtered.filter(d => d !== deviceValue);
+          return newSelection.length === 0 ? ['random'] : newSelection;
+        } else {
+          return [...filtered, deviceValue];
+        }
+      });
+    }
+  };
+
+  const getSelectedDeviceLabel = () => {
+    if (deviceChoice.includes('random') || deviceChoice.length === 0) {
+      return '🔀 Random Device';
+    }
+    if (deviceChoice.length === 1) {
+      const selectedDevice = availableDeviceChoices[device]?.find(d => d.value === deviceChoice[0]);
+      return selectedDevice?.label || '🔀 Random Device';
+    }
+    return `📱 ${deviceChoice.length} Devices Selected`;
+  };
+
+  // Extract device model from user agent string
+  const extractDeviceFromUA = (ua) => {
+    try {
+      // For iPhone user agents
+      if (ua.includes('iPhone')) {
+        const match = ua.match(/FBDV\/(iPhone[^;]+)/);
+        if (match) {
+          const deviceCode = match[1];
+          const deviceInfo = availableDeviceChoices.iphone?.find(d => d.value === deviceCode);
+          return deviceInfo ? deviceInfo.label.replace('📱 ', '') : deviceCode;
+        }
+        
+        // Instagram format for iPhone
+        const instagramMatch = ua.match(/Instagram [^(]+\((iPhone[^;]+);/);
+        if (instagramMatch) {
+          const deviceCode = instagramMatch[1];
+          const deviceInfo = availableDeviceChoices.iphone?.find(d => d.value === deviceCode);
+          return deviceInfo ? deviceInfo.label.replace('📱 ', '') : deviceCode;
+        }
+      }
+      
+      // For Android user agents
+      if (ua.includes('Android')) {
+        let deviceModel = '';
+        
+        // Pattern 1: Android version; device model Build/
+        const androidMatch = ua.match(/Android [^;]+; ([^)]+) Build\//);
+        if (androidMatch) {
+          deviceModel = androidMatch[1].trim();
+        }
+        
+        // Pattern 2: Instagram format with device model
+        if (!deviceModel) {
+          const instagramMatch = ua.match(/Android \([^;]+; [^;]+; [^;]+; [^/]+\/[^;]+; ([^;]+);/);
+          if (instagramMatch) {
+            deviceModel = instagramMatch[1].trim();
+          }
+        }
+        
+        if (deviceModel) {
+          const deviceInfo = availableDeviceChoices.android?.find(d => d.value === deviceModel);
+          return deviceInfo ? deviceInfo.label.replace('📱 ', '') : deviceModel;
+        }
+      }
+      
+      return 'Unknown Device';
+    } catch (error) {
+      console.warn('Error extracting device from UA:', error);
+      return 'Unknown Device';
+    }
+  };
 
   const handleGenerate = async () => {
     const startTime = performance.now(); // Track generation start time
     setIsLoading(true);
     try {
-      console.log('Generating user agents:', { device, browser, version, count, country });
+      console.log('🚀 Starting user agent generation...');
+      const devicesToUse = deviceChoice.includes('random') || deviceChoice.length === 0 ? null : deviceChoice;
+      console.log('Generation parameters:', { 
+        device, 
+        browser, 
+        version, 
+        count, 
+        country, 
+        deviceChoice: devicesToUse,
+        selectedDeviceCount: devicesToUse ? devicesToUse.length : 'random'
+      });
+      console.log('User authenticated:', !!user);
       
-      // Get existing user agents for this user
-      const existingUserAgents = user ? await getExistingDataValues('user_agent') : [];
+      // Test the generation function directly first
+      console.log('Testing generation function...');
+      const testResult = generateUserAgents(device, browser, version, 1, country, devicesToUse);
+      const testUA = Array.isArray(testResult) ? testResult : testResult.userAgents;
+      console.log('Test generation result:', testUA);
+      console.log('Using devices:', devicesToUse);
+      
+      if (!testUA || testUA.length === 0) {
+        throw new Error('Generation function returned empty result');
+      }
+      
+      // Get existing user agents (from localStorage)
+      const existingUserAgents = await getExistingDataValues('user_agent');
+      console.log('Existing user agents count:', existingUserAgents.length);
       
       let uniqueResults = [];
       let uniqueDevices = [];
@@ -50,43 +229,68 @@ export default function UserAgentGenerator() {
           const iosCount = (count - uniqueResults.length) - androidCount;
 
           let androidUAs, iosUAs;
+          
           if (version === 'mix') {
             androidUAs = [];
+            const androidDevices = [];
             for (let i = 0; i < androidCount; i++) {
               const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-              androidUAs.push(...generateUserAgents('android', browser, randomVersion, 1, country));
+              const result = generateUserAgents('android', browser, randomVersion, 1, country, devicesToUse);
+              androidUAs.push(...result.userAgents);
+              androidDevices.push(...result.devices);
             }
             iosUAs = [];
+            const iosDevices = [];
             for (let i = 0; i < iosCount; i++) {
               const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-              iosUAs.push(...generateUserAgents('iphone', browser, randomVersion, 1, country));
+              const result = generateUserAgents('iphone', browser, randomVersion, 1, country, devicesToUse);
+              iosUAs.push(...result.userAgents);
+              iosDevices.push(...result.devices);
             }
+            
+            const combined = [
+              ...androidUAs.map((ua, idx) => ({ ua, device: 'android', deviceModel: androidDevices[idx] })),
+              ...iosUAs.map((ua, idx) => ({ ua, device: 'iphone', deviceModel: iosDevices[idx] }))
+            ];
+            const shuffled = combined.sort(() => Math.random() - 0.5);
+
+            generatedResults = shuffled.map(item => item.ua);
+            generatedDevices = shuffled.map(item => item.deviceModel || item.device);
           } else {
-            androidUAs = generateUserAgents('android', browser, version, androidCount, country);
-            iosUAs = generateUserAgents('iphone', browser, version, iosCount, country);
+            const androidResult = generateUserAgents('android', browser, version, androidCount, country, devicesToUse);
+            const iosResult = generateUserAgents('iphone', browser, version, iosCount, country, devicesToUse);
+
+            const combined = [
+              ...androidResult.userAgents.map((ua, idx) => ({ ua, device: 'android', deviceModel: androidResult.devices[idx] })),
+              ...iosResult.userAgents.map((ua, idx) => ({ ua, device: 'iphone', deviceModel: iosResult.devices[idx] }))
+            ];
+            const shuffled = combined.sort(() => Math.random() - 0.5);
+
+            generatedResults = shuffled.map(item => item.ua);
+            generatedDevices = shuffled.map(item => item.deviceModel || item.device);
           }
-
-          const combined = [...androidUAs.map((ua) => ({ ua, device: 'android' })),
-          ...iosUAs.map((ua) => ({ ua, device: 'iphone' }))];
-          const shuffled = combined.sort(() => Math.random() - 0.5);
-
-          generatedResults = shuffled.map(item => item.ua);
-          generatedDevices = shuffled.map(item => item.device);
         } else {
-          let generated;
+          let result;
+          
           if (version === 'mix') {
-            generated = [];
+            const allResults = [];
+            const allDevices = [];
             for (let i = 0; i < (count - uniqueResults.length); i++) {
               const randomVersion = ['latest', 'recent', 'old'][Math.floor(Math.random() * 3)];
-              generated.push(...generateUserAgents(device, browser, randomVersion, 1, country));
+              const singleResult = generateUserAgents(device, browser, randomVersion, 1, country, devicesToUse);
+              allResults.push(...singleResult.userAgents);
+              allDevices.push(...singleResult.devices);
             }
+            result = { userAgents: allResults, devices: allDevices };
           } else {
-            generated = generateUserAgents(device, browser, version, count - uniqueResults.length, country);
+            result = generateUserAgents(device, browser, version, count - uniqueResults.length, country, devicesToUse);
           }
           
-          generatedResults = generated;
-          generatedDevices = Array(count - uniqueResults.length).fill(device);
+          generatedResults = result.userAgents;
+          generatedDevices = result.devices;
         }
+
+        console.log(`Attempt ${attempts + 1}: Generated ${generatedResults.length} user agents`);
 
         // Filter out duplicates
         for (let i = 0; i < generatedResults.length; i++) {
@@ -99,14 +303,19 @@ export default function UserAgentGenerator() {
         }
         
         attempts++;
+        console.log(`After filtering: ${uniqueResults.length} unique user agents`);
       }
 
       // Take only what we need
       uniqueResults = uniqueResults.slice(0, count);
       uniqueDevices = uniqueDevices.slice(0, count);
 
+      console.log('Final results:', uniqueResults.length, 'user agents generated');
+      console.log('Sample result:', uniqueResults[0]);
+
       setResults(uniqueResults);
       setResultDevices(uniqueDevices);
+      setResultSelectionMode(!deviceChoice.includes('random') && deviceChoice.length > 1 ? randomSelectionMode : null);
       
       // Calculate and emit generation time
       const endTime = performance.now();
@@ -118,29 +327,62 @@ export default function UserAgentGenerator() {
       }));
       
       if (uniqueResults.length > 0) {
-        addToast(`${uniqueResults.length} unique user agents generated!`, 'success');
+        toast.success(`${uniqueResults.length} unique user agents generated!`);
 
-        // Save to database if user is logged in
-        if (user) {
-          try {
-            for (let i = 0; i < uniqueResults.length; i++) {
-              await saveGeneratedData('user_agent', uniqueResults[i], {
-                device: uniqueDevices[i] || device,
-                browser: browser,
-                version: version,
-                country: country
-              }, addGeneratedData);
+        // Save to database (always works with fallback to localStorage)
+        console.log('Saving to database...');
+        let databaseSaveCount = 0;
+        let localStorageCount = 0;
+        let saveResults = [];
+        
+        try {
+          for (let i = 0; i < uniqueResults.length; i++) {
+            const saveResult = await saveGeneratedData('user_agent', uniqueResults[i], {
+              device: uniqueDevices[i] || device,
+              browser: browser,
+              version: version,
+              country: country
+            }, addGeneratedData);
+            
+            saveResults.push(saveResult);
+            
+            if (saveResult.database) {
+              databaseSaveCount++;
+            } else {
+              localStorageCount++;
             }
-          } catch (error) {
-            console.error('Error saving generated data:', error);
           }
+          
+          // Provide feedback about where data was saved
+          if (databaseSaveCount > 0 && localStorageCount === 0) {
+            console.log('✅ All data saved to database successfully');
+            toast.success(`Data saved to database successfully!`);
+          } else if (localStorageCount > 0) {
+            const firstResult = saveResults[0];
+            if (firstResult.reason === 'not-authenticated') {
+              console.log('⚠️ Data saved to localStorage only - user not authenticated');
+              toast.warning('Data saved locally. Log in to save to database.');
+            } else if (firstResult.reason === 'connection-failed') {
+              console.log('⚠️ Data saved to localStorage only - connection failed');
+              toast.warning('Data saved locally. Database connection failed.');
+            } else if (firstResult.reason === 'localStorage-only') {
+              console.log('📱 Data saved to localStorage only - localStorage mode enabled');
+              toast.info('Data saved locally (localStorage mode).');
+            } else {
+              console.log('⚠️ Data saved to localStorage only - database unavailable');
+              toast.warning('Data saved locally. Database unavailable.');
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error saving generated data:', error);
+          toast.error('Error saving data: ' + error.message);
         }
       } else {
-        addToast('No new unique user agents could be generated. Try different settings.', 'warning');
+        toast.warning('No new unique user agents could be generated. Try different settings.');
       }
     } catch (error) {
-      console.error('Error generating user agents:', error);
-      addToast('Error generating user agents: ' + error.message, 'error');
+      console.error('❌ Error generating user agents:', error);
+      toast.error('Error generating user agents: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -150,20 +392,21 @@ export default function UserAgentGenerator() {
     navigator.clipboard.writeText(results.join('\n'));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    addToast(`${results.length} user agents copied!`, 'success');
+    toast.success(`${results.length} user agents copied!`);
   };
 
   const handleCopyIndividual = (ua, index) => {
     navigator.clipboard.writeText(ua);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
-    addToast('User agent copied!', 'success');
+    toast.success('User agent copied!');
   };
 
   const handleClear = () => {
     setResults([]);
     setResultDevices([]);
-    addToast('Results cleared', 'info');
+    setResultSelectionMode(null);
+    toast.info('Results cleared');
   };
 
   const handleExport = (format) => {
@@ -365,6 +608,225 @@ export default function UserAgentGenerator() {
                 </div>
               </div>
 
+              {/* Device Choice Selection - Only show when not Mix */}
+              {device !== 'mix' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                      Device Model
+                    </h3>
+                    <span className="text-xs text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+                      {getSelectedDeviceLabel()}
+                    </span>
+                  </div>
+                  
+                  {/* Custom Multi-Select Dropdown */}
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => setShowDeviceDropdown(!showDeviceDropdown)}
+                      className="w-full h-12 bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-slate-100 hover:border-cyan-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all flex items-center justify-between"
+                    >
+                      <span className="truncate">{getSelectedDeviceLabel()}</span>
+                      <svg 
+                        className={`w-4 h-4 transition-transform ${showDeviceDropdown ? 'rotate-180' : ''}`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {showDeviceDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 max-h-80 overflow-y-auto">
+                        {/* Random Option */}
+                        <div className="p-2 border-b border-slate-700">
+                          <label className="flex items-center gap-3 p-2 hover:bg-slate-700/50 rounded-lg cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={deviceChoice.includes('random')}
+                              onChange={() => handleDeviceToggle('random')}
+                              className="w-4 h-4 text-cyan-500 bg-slate-700 border-slate-600 rounded focus:ring-cyan-500 focus:ring-2"
+                            />
+                            <span className="text-slate-200 text-sm">🔀 Random Device</span>
+                          </label>
+                        </div>
+
+                        {/* Device Categories */}
+                        {availableDeviceChoices[device]?.reduce((acc, deviceOption) => {
+                          if (deviceOption.value === 'random') return acc;
+                          
+                          // Group by category
+                          if (!acc.find(group => group.category === deviceOption.category)) {
+                            acc.push({
+                              category: deviceOption.category,
+                              devices: [deviceOption]
+                            });
+                          } else {
+                            acc.find(group => group.category === deviceOption.category).devices.push(deviceOption);
+                          }
+                          return acc;
+                        }, []).map(group => (
+                          <div key={group.category} className="p-2">
+                            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 py-1 mb-1">
+                              {group.category}
+                            </div>
+                            {group.devices.map(deviceOption => (
+                              <label 
+                                key={deviceOption.value} 
+                                className="flex items-center gap-3 p-2 hover:bg-slate-700/50 rounded-lg cursor-pointer transition-colors"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={deviceChoice.includes(deviceOption.value)}
+                                  onChange={() => handleDeviceToggle(deviceOption.value)}
+                                  className="w-4 h-4 text-cyan-500 bg-slate-700 border-slate-600 rounded focus:ring-cyan-500 focus:ring-2"
+                                />
+                                <span className="text-slate-200 text-sm">{deviceOption.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Random Selection Buttons */}
+                  <div className="space-y-3">
+                    {/* Multiple Device Selection Toggle */}
+                    <div className="bg-slate-800/30 rounded-xl p-3 border border-slate-700/50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-sm font-semibold text-slate-300">Device Selection Type</h4>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {multipleDeviceSelection ? 'Select multiple devices for variety' : 'Select only one device'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setMultipleDeviceSelection(!multipleDeviceSelection)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-800 ${
+                            multipleDeviceSelection ? 'bg-cyan-600' : 'bg-slate-600'
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              multipleDeviceSelection ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Random Selection Mode */}
+                    <div className="bg-slate-800/30 rounded-xl p-3 border border-slate-700/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-semibold text-slate-300">Random Selection Mode</h4>
+                        <span className="text-xs text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded border border-cyan-500/30 capitalize">
+                          {randomSelectionMode === 'mixed' ? '🔀 Mixed' : 
+                           randomSelectionMode === 'latest' ? '🆕 Latest' :
+                           randomSelectionMode === 'popular' ? '⭐ Popular' : '📂 Category'}
+                        </span>
+                      </div>
+                      <select
+                        value={randomSelectionMode}
+                        onChange={(e) => setRandomSelectionMode(e.target.value)}
+                        className="w-full h-10 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all appearance-none cursor-pointer"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                          backgroundPosition: 'right 8px center',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundSize: '12px'
+                        }}
+                      >
+                        <option value="mixed">🔀 Mixed - All device types</option>
+                        <option value="latest">🆕 Latest - Newer models only</option>
+                        <option value="popular">⭐ Popular - Popular brands</option>
+                        <option value="category">📂 Category - Single category</option>
+                      </select>
+                      
+                      {/* Preview */}
+                      {(() => {
+                        const preview = getRandomDevicePreview(device, randomSelectionMode);
+                        return (
+                          <div className="mt-2 p-2 bg-slate-900/50 rounded-lg border border-slate-600/30">
+                            <div className="text-xs text-slate-400 mb-1">
+                              Preview: {preview.description} • {multipleDeviceSelection ? 'Multiple devices' : 'Single device'}
+                            </div>
+                            <div className="text-xs text-slate-300">
+                              {preview.examples.length > 0 ? (
+                                <>Examples: {preview.examples.slice(0, multipleDeviceSelection ? 3 : 1).join(', ')}{preview.examples.length >= 3 && multipleDeviceSelection ? '...' : ''}</>
+                              ) : (
+                                'No examples available'
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleRandomDeviceSelection}
+                        className="flex-1 h-10 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 hover:border-cyan-400/50 text-cyan-300 hover:text-cyan-200 rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 text-sm"
+                      >
+                        <span className="text-base">🎲</span>
+                        Random Selection
+                      </button>
+                      {!deviceChoice.includes('random') && deviceChoice.length > 1 && (
+                        <button
+                          onClick={handleShuffleDevices}
+                          className="h-10 px-4 bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-500/30 hover:border-purple-400/50 text-purple-300 hover:text-purple-200 rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 text-sm"
+                        >
+                          <span className="text-base">🔀</span>
+                          Shuffle
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setDeviceChoice(['random'])}
+                        className="h-10 px-4 bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/50 hover:border-slate-500/50 text-slate-300 hover:text-white rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 text-sm"
+                      >
+                        <span className="text-base">🔄</span>
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Selected Devices Preview */}
+                  {!deviceChoice.includes('random') && deviceChoice.length > 0 && (
+                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-semibold text-slate-300">Selected Devices</h4>
+                        <span className="text-xs text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded border border-cyan-500/30">
+                          {deviceChoice.length} selected
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {deviceChoice.map(deviceValue => {
+                          const deviceInfo = availableDeviceChoices[device]?.find(d => d.value === deviceValue);
+                          return deviceInfo ? (
+                            <span 
+                              key={deviceValue}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-lg border border-cyan-500/30"
+                            >
+                              {deviceInfo.label}
+                              <button
+                                onClick={() => handleDeviceToggle(deviceValue)}
+                                className="ml-1 hover:text-red-400 transition-colors"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* App Selection - Traditional Dropdown */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -552,15 +1014,28 @@ export default function UserAgentGenerator() {
                               <td className="py-4 px-6">
                                 <div className="flex items-center gap-4">
                                   <div className="flex-shrink-0">
-                                    {(resultDevices[index] || device) === 'android' ? (
-                                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/20 border border-green-500/30 flex items-center justify-center shadow-lg shadow-green-500/25">
-                                        <Smartphone size={18} className="text-green-400" />
-                                      </div>
-                                    ) : (
-                                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                                        <Smartphone size={18} className="text-blue-400" />
-                                      </div>
-                                    )}
+                                    {(() => {
+                                      const deviceModel = resultDevices[index];
+                                      let isAndroid = false;
+                                      
+                                      if (deviceModel && deviceModel !== 'random') {
+                                        // Check if it's an Android device by looking it up in availableDeviceChoices
+                                        isAndroid = availableDeviceChoices.android?.some(d => d.value === deviceModel) || false;
+                                      } else {
+                                        // Fallback to checking the device platform or UA
+                                        isAndroid = device === 'android' || ua.includes('Android');
+                                      }
+                                      
+                                      return isAndroid ? (
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/20 border border-green-500/30 flex items-center justify-center shadow-lg shadow-green-500/25">
+                                          <Smartphone size={18} className="text-green-400" />
+                                        </div>
+                                      ) : (
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                                          <Smartphone size={18} className="text-blue-400" />
+                                        </div>
+                                      );
+                                    })()}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="font-mono text-sm text-slate-300 break-all leading-relaxed">
@@ -568,14 +1043,48 @@ export default function UserAgentGenerator() {
                                     </p>
                                     <div className="flex items-center gap-2 mt-1">
                                       <span className={`text-xs px-2 py-1 rounded-full ${
-                                        (resultDevices[index] || device) === 'android' 
-                                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                          : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                        (() => {
+                                          const deviceModel = resultDevices[index];
+                                          let isAndroid = false;
+                                          
+                                          if (deviceModel && deviceModel !== 'random') {
+                                            isAndroid = availableDeviceChoices.android?.some(d => d.value === deviceModel) || false;
+                                          } else {
+                                            isAndroid = device === 'android' || ua.includes('Android');
+                                          }
+                                          
+                                          return isAndroid 
+                                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
+                                        })()
                                       }`}>
-                                        {(resultDevices[index] || device) === 'android' ? '📱 Android' : '🍎 iPhone'}
+                                        {(() => {
+                                          const deviceModel = resultDevices[index];
+                                          let isAndroid = false;
+                                          
+                                          if (deviceModel && deviceModel !== 'random') {
+                                            isAndroid = availableDeviceChoices.android?.some(d => d.value === deviceModel) || false;
+                                          } else {
+                                            isAndroid = device === 'android' || ua.includes('Android');
+                                          }
+                                          
+                                          return isAndroid ? '📱 Android' : '🍎 iPhone';
+                                        })()}
                                       </span>
                                       <span className="text-xs text-slate-500 capitalize">
                                         {browser.replace('_', ' ')}
+                                      </span>
+                                      <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded border border-slate-600/30">
+                                        {(() => {
+                                          const deviceModel = resultDevices[index];
+                                          if (deviceModel && deviceModel !== 'android' && deviceModel !== 'iphone' && deviceModel !== 'random') {
+                                            // Find the device info from available choices
+                                            const devicePlatform = (resultDevices[index] || device) === 'android' ? 'android' : 'iphone';
+                                            const deviceInfo = availableDeviceChoices[devicePlatform]?.find(d => d.value === deviceModel);
+                                            return deviceInfo ? deviceInfo.label.replace('📱 ', '') : deviceModel;
+                                          }
+                                          return extractDeviceFromUA(ua);
+                                        })()}
                                       </span>
                                     </div>
                                   </div>
